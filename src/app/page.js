@@ -26,7 +26,7 @@ export default function Home() {
   const [worstFoods, setWorstFoods] = useState([]);
   const [dayAverage, setDayAverage] = useState(null);
   useEffect(() => {
-    fetch(`https://thecaf.app/api/foods`)
+    fetch(`https://thecaf.app/api/foods?method=highest`)
       .then((res) => res.json())
       .then((json) => {
         setMostPopularItem(json.topFoods[0]);

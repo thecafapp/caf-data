@@ -11,9 +11,9 @@ import {
   Badge,
 } from "@tremor/react";
 
-export default function FoodTable({ foods, color, title = "Foods" }) {
+export default function FoodTable({ foods, color, title = "Foods", id }) {
   return (
-    <Card>
+    <Card id={id}>
       <Title>{title}</Title>
       <Table className="mt-3">
         <TableHead>

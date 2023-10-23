@@ -1,50 +1,73 @@
 "use client";
 
 import {
-  Card,
-  Grid,
   Title,
   Text,
   Tab,
   TabList,
   TabGroup,
-  TabPanel,
   TabPanels,
-  Metric,
   Flex,
   Badge,
 } from "@tremor/react";
-import { ArrowRightIcon, StarIcon } from "@heroicons/react/outline";
+
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import FoodTable from "./components/TopFoodsTable";
+import { useEffect, useRef, useState } from "react";
+
+import useWindowHash from "./hooks/useWindowHash";
+import Dashboard from "./tabs/Dashboard";
+import { HomeIcon } from "@heroicons/react/outline";
+import ComingSoon from "./tabs/ComingSoon";
 
 export default function Home() {
-  const [mostPopularItem, setMostPopularItem] = useState(null);
-  const [popularFoods, setPopularFoods] = useState([]);
-  const [worstItem, setWorstItem] = useState(null);
-  const [worstFoods, setWorstFoods] = useState([]);
-  const [dayAverage, setDayAverage] = useState(null);
-  useEffect(() => {
-    fetch(`https://thecaf.app/api/foods?method=highest`)
-      .then((res) => res.json())
-      .then((json) => {
-        setMostPopularItem(json.topFoods[0]);
-        setPopularFoods(json.topFoods);
-      });
-    fetch(`https://thecaf.app/api/foods?method=lowest`)
-      .then((res) => res.json())
-      .then((json) => {
-        setWorstItem(json.worstFoods[0]);
-        setWorstFoods(json.worstFoods);
-      });
+  const dashboardTab = useRef(null);
+  const averageTab = useRef(null);
+  const foodTab = useRef(null);
+  const mealsTab = useRef(null);
 
-    fetch(`/api/average?date=10-22-2023`)
-      .then((res) => res.json())
-      .then((json) => {
-        setDayAverage(json.average);
-      });
-  }, []);
+  const [tabIndex, setTabIndex] = useState(null);
+  const hash = useWindowHash();
+
+  useEffect(() => {
+    console.log("useEffect running");
+    switch (hash) {
+      case "#/average":
+        setTabIndex(1);
+        if (averageTab.current) averageTab.current.click();
+        break;
+      case "#/food":
+        if (foodTab.current) foodTab.current.click();
+        setTabIndex(2);
+        break;
+      case "#/meals":
+        setTabIndex(3);
+        if (mealsTab.current) mealsTab.current.click();
+        break;
+      default:
+        setTabIndex(0);
+    }
+  }, [hash]);
+
+  const handleIndexChange = (index) => {
+    setTabIndex(index);
+    switch (index) {
+      case 0:
+        window.location.hash = "#/dashboard";
+        break;
+      case 1:
+        window.location.hash = "#/average";
+        break;
+      case 2:
+        window.location.hash = "#/food";
+        break;
+      case 3:
+        window.location.hash = "#/meals";
+        break;
+      default:
+        window.location.hash = "#/unknown";
+    }
+  };
+
   return (
     <main className="p-12 max-w-screen-xl m-auto">
       <Flex justifyContent="start">
@@ -56,7 +79,16 @@ export default function Home() {
           className="contrast-0	brightness-200 mr-5"
         ></Image>
         <div>
-          <Title>Caf Data</Title>
+          <Flex justifyContent="start">
+            <Title className="mr-2">Caf Data</Title>
+            <Badge
+              color="orange"
+              size="sm"
+              tooltip="This software is in heavy development and is not ready for production use."
+            >
+              ALPHA
+            </Badge>
+          </Flex>
           <Text>
             This dashboard allows you to view rating data for{" "}
             <a
@@ -71,94 +103,29 @@ export default function Home() {
         </div>
       </Flex>
 
-      <TabGroup className="mt-6">
-        <TabList>
-          <Tab>Dashboard</Tab>
-          <Tab>Details</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <Grid numItemsMd={2} numItemsLg={3} className="gap-6 mt-6">
-              <Card>
-                {mostPopularItem && (
-                  <>
-                    <Flex>
-                      <Text>Most Popular Meal Item</Text>
-                      <Badge icon={StarIcon}>
-                        {Number(mostPopularItem.rating).toFixed(2)}
-                      </Badge>
-                    </Flex>
-                    <Metric>{mostPopularItem.name}</Metric>
-                    <Text>
-                      {mostPopularItem.ratings} ratings |{" "}
-                      <a href="#" className="text-blue-500">
-                        see more
-                      </a>
-                    </Text>
-                  </>
-                )}
-              </Card>
-              <Card>
-                {worstItem && (
-                  <>
-                    <Flex>
-                      <Text>Least Popular Meal Item</Text>
-                      <Badge icon={StarIcon}>
-                        {Number(worstItem.rating).toFixed(2)}
-                      </Badge>
-                    </Flex>
-                    <Metric>{worstItem.name}</Metric>
-                    <Text>
-                      {worstItem.ratings} ratings |{" "}
-                      <a href="#" className="text-blue-500">
-                        see more
-                      </a>
-                    </Text>
-                  </>
-                )}
-              </Card>
-              <Card>
-                {worstItem && (
-                  <>
-                    <Flex>
-                      <Text>Average of Ratings</Text>
-                      <Badge icon={ArrowRightIcon} color="yellow">
-                        progress
-                      </Badge>
-                    </Flex>
-                    <Metric>{Number(dayAverage).toFixed(2)}</Metric>
-                    <Text>
-                      cumulative average |{" "}
-                      <a href="#" className="text-blue-500">
-                        see more
-                      </a>
-                    </Text>
-                  </>
-                )}
-              </Card>
-            </Grid>
-            <div className="mt-6">
-              <FoodTable
-                title="Top Foods All Time"
-                foods={popularFoods}
-                color="green"
-              />
-            </div>
-            <div className="mt-6">
-              <FoodTable
-                title="Worst Foods All Time"
-                foods={worstFoods}
-                color="red"
-              />
-            </div>
-          </TabPanel>
-          <TabPanel>
-            <div className="mt-6">
-              <Card></Card>
-            </div>
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
+      {tabIndex !== null && (
+        <TabGroup
+          className="mt-6"
+          tabIndex={tabIndex}
+          onIndexChange={handleIndexChange}
+          defaultIndex={tabIndex}
+        >
+          <TabList>
+            <Tab ref={dashboardTab} icon={HomeIcon}>
+              Dashboard
+            </Tab>
+            <Tab ref={averageTab}>Ratings Over Time</Tab>
+            <Tab ref={foodTab}>Individual Foods</Tab>
+            <Tab ref={mealsTab}>Meal History</Tab>
+          </TabList>
+          <TabPanels>
+            <Dashboard />
+            <ComingSoon />
+            <ComingSoon />
+            <ComingSoon />
+          </TabPanels>
+        </TabGroup>
+      )}
     </main>
   );
 }

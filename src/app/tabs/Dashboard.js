@@ -23,7 +23,7 @@ export default function Dashboard() {
         setWorstFoods(json.worstFoods);
       });
 
-    fetch(`/api/average?date=10-22-2023`)
+    fetch(`/api/average`)
       .then((res) => res.json())
       .then((json) => {
         setDayAverage(json.average);

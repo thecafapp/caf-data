@@ -18,6 +18,7 @@ import useWindowHash from "./hooks/useWindowHash";
 import Dashboard from "./tabs/Dashboard";
 import { HomeIcon } from "@heroicons/react/outline";
 import ComingSoon from "./tabs/ComingSoon";
+import AverageOverTime from "./tabs/AverageOverTime";
 
 export default function Home() {
   const dashboardTab = useRef(null);
@@ -69,7 +70,7 @@ export default function Home() {
   };
 
   return (
-    <main className="p-12 max-w-screen-xl m-auto">
+    <main className="p-8 max-w-screen-xl m-auto">
       <Flex justifyContent="start">
         <Image
           src="https://thecaf.app/caf.svg"
@@ -120,7 +121,7 @@ export default function Home() {
           </TabList>
           <TabPanels>
             <Dashboard />
-            <ComingSoon />
+            <AverageOverTime />
             <ComingSoon />
             <ComingSoon />
           </TabPanels>

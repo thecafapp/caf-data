@@ -4,7 +4,7 @@ export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
   useEffect(() => {
     let promiseArr = [];
-    for (let i = 9; i > 0; i--) {
+    for (let i = 11; i > 0; i--) {
       promiseArr.push(fetch(`/api/average?interval=${i}`));
     }
     Promise.all(promiseArr).then((resArray) => {

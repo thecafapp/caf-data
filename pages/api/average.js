@@ -19,8 +19,15 @@ export default async function handler(req, res) {
       "https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o?fields=timeCreated"
     );
     const { objects: list } = await listFetch.json();
-    if (req.query.interval) {
-      documentName = list[list.length - (Number(req.query.interval) + 1)].name;
+    if (req.query.offset) {
+      try {
+        documentName = list[list.length - (Number(req.query.offset) + 1)].name;
+      } catch {
+        return res
+          .setHeader("Cache-Control", "max-age=3600, public")
+          .status(404)
+          .json({ error: "No data for this day" });
+      }
       documentFetch = await fetch(
         `https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o/${documentName}`
       );
@@ -51,12 +58,12 @@ export default async function handler(req, res) {
   lastMeal.foodRatings.forEach((obj) => {
     sum += obj.rating;
   });
-  const avg = sum / lastMeal.foodRatings.length;
+  const avgFood = sum / lastMeal.foodRatings.length;
   return res
     .setHeader("Cache-Control", "max-age=7200, public")
     .status(200)
     .json({
-      average: avg,
+      foodAverage: avgFood,
       date: documentName.split("cafdata-")[1].split(".json")[0],
     });
 }

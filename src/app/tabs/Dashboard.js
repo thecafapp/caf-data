@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
-import { Metric, Badge, Flex, Text, Card, TabPanel, Grid } from "@tremor/react";
-import { ArrowRightIcon, StarIcon } from "@heroicons/react/outline";
+import {
+  Metric,
+  Badge,
+  BadgeDelta,
+  Flex,
+  Text,
+  Card,
+  TabPanel,
+  Grid,
+} from "@tremor/react";
+import { StarIcon } from "@heroicons/react/outline";
 import FoodTable from "../components/TopFoodsTable";
 
 export default function Dashboard() {
@@ -9,6 +18,10 @@ export default function Dashboard() {
   const [worstItem, setWorstItem] = useState(null);
   const [worstFoods, setWorstFoods] = useState([]);
   const [dayAverage, setDayAverage] = useState(null);
+  const [avgDelta, setAvgDelta] = useState({
+    name: "unchanged",
+    amount: "0.00",
+  });
   useEffect(() => {
     fetch(`https://thecaf.app/api/foods?method=highest`)
       .then((res) => res.json())
@@ -23,10 +36,33 @@ export default function Dashboard() {
         setWorstFoods(json.worstFoods);
       });
 
+    let todayAverage, yesterdayAverage;
     fetch(`/api/average`)
       .then((res) => res.json())
       .then((json) => {
-        setDayAverage(json.average);
+        todayAverage = json.foodAverage;
+        setDayAverage(json.foodAverage);
+      });
+    fetch(`/api/average?offset=1`)
+      .then((res) => res.json())
+      .then((json) => {
+        yesterdayAverage = json.foodAverage;
+        if (todayAverage > yesterdayAverage) {
+          setAvgDelta({
+            amount: Math.abs(todayAverage - yesterdayAverage).toFixed(2),
+            name: "increase",
+          });
+        } else if (yesterdayAverage > todayAverage) {
+          setAvgDelta({
+            amount: Math.abs(todayAverage - yesterdayAverage).toFixed(2),
+            name: "decrease",
+          });
+        } else {
+          setAvgDelta({
+            amount: "0.00",
+            name: "unchanged",
+          });
+        }
       });
   }, []);
   return (
@@ -36,7 +72,7 @@ export default function Dashboard() {
           {mostPopularItem && (
             <>
               <Flex>
-                <Text>Most Popular Meal Item</Text>
+                <Text>Most Popular Item</Text>
                 <Badge icon={StarIcon}>
                   {Number(mostPopularItem.rating).toFixed(2)}
                 </Badge>
@@ -55,7 +91,7 @@ export default function Dashboard() {
           {worstItem && (
             <>
               <Flex>
-                <Text>Least Popular Meal Item</Text>
+                <Text>Least Popular Item</Text>
                 <Badge icon={StarIcon}>
                   {Number(worstItem.rating).toFixed(2)}
                 </Badge>
@@ -71,13 +107,13 @@ export default function Dashboard() {
           )}
         </Card>
         <Card>
-          {worstItem && (
+          {dayAverage && avgDelta && (
             <>
               <Flex>
-                <Text>Average of Ratings</Text>
-                <Badge icon={ArrowRightIcon} color="yellow">
-                  progress
-                </Badge>
+                <Text>Average Rating</Text>
+                <BadgeDelta deltaType={avgDelta.name}>
+                  {avgDelta.amount}
+                </BadgeDelta>
               </Flex>
               <Metric>{Number(dayAverage).toFixed(2)}</Metric>
               <Text>

@@ -30,8 +30,15 @@ export default function Home() {
   const hash = useWindowHash();
 
   useEffect(() => {
-    console.log("useEffect running");
-    switch (hash) {
+    route(hash);
+  }, [hash]);
+
+  useEffect(() => {
+    route(window.location.hash);
+  }, []);
+
+  const route = (hashToUse) => {
+    switch (hashToUse) {
       case "#/average":
         setTabIndex(1);
         if (averageTab.current) averageTab.current.click();
@@ -47,7 +54,7 @@ export default function Home() {
       default:
         setTabIndex(0);
     }
-  }, [hash]);
+  };
 
   const handleIndexChange = (index) => {
     setTabIndex(index);

@@ -11,12 +11,10 @@ export default async function handler(req, res) {
       .format(date)
       .replace(/\//g, "-");
     documentName = `cafdata-${dateFormatted}.json`;
-    documentFetch = await fetch(
-      `https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o/${documentName}`
-    );
+    documentFetch = await fetch(`${process.env.CAFBUCKET}/${documentName}`);
   } else {
     const listFetch = await fetch(
-      "https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o?fields=timeCreated"
+      `${process.env.CAFBUCKET}?fields=timeCreated`
     );
     const { objects: list } = await listFetch.json();
     if (req.query.offset) {
@@ -28,14 +26,10 @@ export default async function handler(req, res) {
           .status(404)
           .json({ error: "No data for this day" });
       }
-      documentFetch = await fetch(
-        `https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o/${documentName}`
-      );
+      documentFetch = await fetch(`${process.env.CAFBUCKET}/${documentName}`);
     } else {
       documentName = list[list.length - 1].name;
-      documentFetch = await fetch(
-        `https://objectstorage.us-ashburn-1.oraclecloud.com/p/nyWTgMiuwyM7ad_-U0mT0LZIRCpLijIJ-atkcnVtIs5ny9ceQ7IGr5YTXp_LwlOh/n/idosm4hvvvj8/b/cafapp-data-bucket/o/${documentName}`
-      );
+      documentFetch = await fetch(`${process.env.CAFBUCKET}/${documentName}`);
     }
   }
   if (documentFetch.status != 200) {

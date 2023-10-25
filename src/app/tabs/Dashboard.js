@@ -10,7 +10,7 @@ import {
   Grid,
 } from "@tremor/react";
 import { StarIcon } from "@heroicons/react/outline";
-import FoodTable from "../components/TopFoodsTable";
+import FoodTable from "../components/FoodTable";
 
 export default function Dashboard() {
   const [mostPopularItem, setMostPopularItem] = useState(null);
@@ -77,7 +77,7 @@ export default function Dashboard() {
                   {Number(mostPopularItem.rating).toFixed(2)}
                 </Badge>
               </Flex>
-              <Metric>{mostPopularItem.name}</Metric>
+              <Metric className="capitalize">{mostPopularItem.name}</Metric>
               <Text>
                 {mostPopularItem.ratings} ratings |{" "}
                 <a href="#top-foods" className="text-blue-500">
@@ -96,7 +96,7 @@ export default function Dashboard() {
                   {Number(worstItem.rating).toFixed(2)}
                 </Badge>
               </Flex>
-              <Metric>{worstItem.name}</Metric>
+              <Metric className="capitalize">{worstItem.name}</Metric>
               <Text>
                 {worstItem.ratings} ratings |{" "}
                 <a href="#worst-foods" className="text-blue-500">

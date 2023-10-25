@@ -26,8 +26,8 @@ export default function FoodTable({ foods, color, title = "Foods", id }) {
         </TableHead>
         <TableBody>
           {foods.map((item) => (
-            <TableRow key={item.name}>
-              <TableCell>{item.name}</TableCell>
+            <TableRow key={item._id}>
+              <TableCell className="capitalize">{item.name}</TableCell>
               <TableCell>
                 <Badge color={color}>{Number(item.rating).toFixed(2)}</Badge>
               </TableCell>

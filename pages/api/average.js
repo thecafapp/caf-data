@@ -59,8 +59,9 @@ export default async function handler(req, res) {
     sum += obj.rating;
   });
   const avgFood = sum / lastMeal.foodRatings.length;
+  const cacheLength = req.query.offset > 0 ? "2630000" : "3600";
   return res
-    .setHeader("Cache-Control", "max-age=7200, public")
+    .setHeader("Cache-Control", `max-age=${cacheLength}, public`)
     .status(200)
     .json({
       foodAverage: avgFood,

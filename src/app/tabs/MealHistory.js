@@ -4,6 +4,8 @@ import {
   ViewListIcon,
   ExclamationIcon,
   ClockIcon,
+  ArrowRightIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/outline";
 import {
   TabPanel,
@@ -85,6 +87,15 @@ export default function MealHistory() {
     return arr ? arr[0]?.rating?.toFixed(2) || "—" : "—";
   };
 
+  const incDecDay = (incOrDec) => {
+    const currentIndex = dates.findIndex((obj) => obj.name == day);
+    if (incOrDec == "inc" && currentIndex < dates.length) {
+      setDay(dates[currentIndex + 1].name);
+    } else if (incOrDec == "dec" && currentIndex > 0) {
+      setDay(dates[currentIndex - 1].name);
+    }
+  };
+
   return (
     <TabPanel>
       <Grid numItemsLg={6} className="gap-6 mt-6">
@@ -93,12 +104,13 @@ export default function MealHistory() {
             <Card>
               <Select
                 onValueChange={setDay}
+                value={day}
                 className="mb-2"
                 icon={CalendarIcon}
                 placeholder="Select date..."
               >
                 {dates.map((d) => (
-                  <SelectItem value={d.name}>
+                  <SelectItem value={d.name} key={d.name}>
                     {d.date.toLocaleString("en-US", {
                       weekday: "long",
                       month: "long",
@@ -113,13 +125,33 @@ export default function MealHistory() {
                 icon={ViewListIcon}
                 disabled={!day}
                 onValueChange={setMeal}
+                value={meal}
               >
                 {mealOptions.map((m) => (
-                  <SelectItem value={m}>
+                  <SelectItem value={m} key={m}>
                     {m.charAt(0).toUpperCase() + m.substring(1)}
                   </SelectItem>
                 ))}
               </Select>
+              <Flex justifyContent="end" className="mt-2">
+                <Button
+                  icon={ArrowLeftIcon}
+                  size="sm"
+                  variant="secondary"
+                  className="mr-2"
+                  disabled={!dayData}
+                  onClick={() => incDecDay("dec")}
+                  tooltip="Previous day"
+                ></Button>
+                <Button
+                  icon={ArrowRightIcon}
+                  size="sm"
+                  variant="secondary"
+                  disabled={!dayData}
+                  onClick={() => incDecDay("inc")}
+                  tooltip="Next day"
+                ></Button>
+              </Flex>
             </Card>
             {dayData && meal && (
               <Card>

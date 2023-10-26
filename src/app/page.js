@@ -91,11 +91,11 @@ export default function Home() {
           <Flex justifyContent="start">
             <Title className="mr-2">Caf Data</Title>
             <Badge
-              color="orange"
-              size="sm"
-              tooltip="This software is in heavy development and is not ready for production use."
+              color="yellow"
+              size="xs"
+              tooltip="This software is still in development and some features may be buggy or unfinished."
             >
-              ALPHA
+              BETA
             </Badge>
           </Flex>
           <Text>

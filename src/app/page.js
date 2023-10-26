@@ -99,7 +99,7 @@ export default function Home() {
             </Badge>
           </Flex>
           <Text>
-            This dashboard allows you to view rating data for{" "}
+            A dashboard for historical rating data from{" "}
             <a
               href="https://thecaf.app"
               target="_blank"

@@ -117,7 +117,7 @@ export default function Dashboard() {
               </Flex>
               <Metric>{Number(dayAverage).toFixed(2)}</Metric>
               <Text>
-                cumulative since Aug 2023 |{" "}
+                cumulative avg |{" "}
                 <a href="#/average" className="text-blue-500">
                   see more
                 </a>

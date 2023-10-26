@@ -19,6 +19,7 @@ import Dashboard from "./tabs/Dashboard";
 import { HomeIcon } from "@heroicons/react/outline";
 import ComingSoon from "./tabs/ComingSoon";
 import AverageOverTime from "./tabs/AverageOverTime";
+import MealHistory from "./tabs/MealHistory";
 
 export default function Home() {
   const dashboardTab = useRef(null);
@@ -130,7 +131,7 @@ export default function Home() {
             <Dashboard />
             <AverageOverTime />
             <ComingSoon />
-            <ComingSoon />
+            <MealHistory />
           </TabPanels>
         </TabGroup>
       )}

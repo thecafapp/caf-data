@@ -24,8 +24,13 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  overflow-y: scroll;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+.select-caps span {
+  text-transform: uppercase;
 }

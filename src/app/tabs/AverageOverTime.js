@@ -16,8 +16,8 @@ import {
 import { useEffect, useState } from "react";
 export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
-  const [timeInterval, setTimeInterval] = useState("7");
-  const [numOfDataPoints, setNumOfDataPoints] = useState(8);
+  const [timeInterval, setTimeInterval] = useState("1");
+  const [numOfDataPoints, setNumOfDataPoints] = useState(30);
 
   const loadChart = () => {
     let promiseArr = [];
@@ -49,8 +49,10 @@ export default function AverageOverTime() {
   };
 
   useEffect(() => {
-    setChartData([]);
-    setTimeout(loadChart, 1000);
+    if (numOfDataPoints > 2 && numOfDataPoints < 61) {
+      setChartData([]);
+      setTimeout(loadChart, 1000);
+    }
   }, [timeInterval, numOfDataPoints]);
 
   return (
@@ -68,10 +70,10 @@ export default function AverageOverTime() {
             <Flex className="w-85">
               <NumberInput
                 className="w-20 mr-5"
-                max={20}
+                max={60}
                 min={2}
-                error={numOfDataPoints < 2 || numOfDataPoints > 20}
-                errorMessage="Maximum datapoints is 20."
+                error={numOfDataPoints < 2 || numOfDataPoints > 60}
+                errorMessage="Please only request up to 60 data points."
                 value={numOfDataPoints}
                 onValueChange={setNumOfDataPoints}
               />
@@ -100,7 +102,7 @@ export default function AverageOverTime() {
               showAnimation={true}
             />
           ) : (
-            <Flex justifyContent="center" className="mt-20 mb-20">
+            <Flex justifyContent="center" className="h-72 mt-3">
               <Subtitle>Loading data...</Subtitle>
             </Flex>
           )}

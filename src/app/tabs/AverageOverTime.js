@@ -12,12 +12,16 @@ import {
   NumberInput,
   Subtitle,
   Callout,
+  MultiSelect,
+  MultiSelectItem,
 } from "@tremor/react";
 import { useEffect, useState } from "react";
 export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
   const [timeInterval, setTimeInterval] = useState("1");
   const [numOfDataPoints, setNumOfDataPoints] = useState(30);
+  const [chartValue, setChartValue] = useState(null);
+  const [categories, setCategories] = useState(["Cumulative Food Rating"]);
 
   const loadChart = () => {
     let promiseArr = [];
@@ -33,7 +37,11 @@ export default function AverageOverTime() {
             if (res.ok) {
               entries.push({
                 date: data.date,
-                Rating: Number(data.foodAverage).toFixed(4),
+                "Cumulative Food Rating": Number(data.foodAverage).toFixed(4),
+                "Meal Rating":
+                  data.mealAverage != null
+                    ? Number(data.mealAverage).toFixed(4)
+                    : null,
               });
               entries.sort((a, b) => {
                 return new Date(a.date) - new Date(b.date);
@@ -60,16 +68,10 @@ export default function AverageOverTime() {
       <div className="mt-6">
         <Card>
           <Flex justifyContent="between">
-            <div>
-              <Title>Average Rating Over Time</Title>
-              <Text>
-                This chart displays the average rating of all foods regardless
-                of whether or not they were served on that day.
-              </Text>
-            </div>
+            <Title>Average Rating Over Time</Title>
             <Flex className="w-85">
               <NumberInput
-                className="w-20 mr-5"
+                className="w-20 mr-2"
                 max={60}
                 min={2}
                 error={numOfDataPoints < 2 || numOfDataPoints > 60}
@@ -78,7 +80,7 @@ export default function AverageOverTime() {
                 onValueChange={setNumOfDataPoints}
               />
               <Select
-                className="w-40"
+                className="w-40 mr-2"
                 placeholder="Interval..."
                 icon={CalendarIcon}
                 value={timeInterval}
@@ -89,17 +91,28 @@ export default function AverageOverTime() {
                 <SelectItem value="7">By week</SelectItem>
                 <SelectItem value="30">By month</SelectItem>
               </Select>
+              <MultiSelect value={categories} onValueChange={setCategories}>
+                <MultiSelectItem value="Cumulative Food Rating">
+                  Cumulative Food Rating
+                </MultiSelectItem>
+                <MultiSelectItem value="Meal Rating">
+                  Meal Rating
+                </MultiSelectItem>
+              </MultiSelect>
             </Flex>
           </Flex>
+          <Text>recorded per day</Text>
           {chartData.length > 1 ? (
             <AreaChart
               className="h-72 mt-3"
               data={chartData}
               index="date"
-              categories={["Rating"]}
-              colors={["blue"]}
+              onValueChange={setChartValue}
+              categories={categories}
+              colors={["blue", "indigo"]}
               autoMinValue={true}
               showAnimation={true}
+              connectNulls={true}
             />
           ) : (
             <Flex justifyContent="center" className="h-72 mt-3">

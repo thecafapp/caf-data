@@ -48,17 +48,29 @@ export default async function handler(req, res) {
   const json = await documentFetch.json();
   const keys = Object.keys(json);
   const lastMeal = json[keys[keys.length - 1]];
-  let sum = 0;
+  let foodSum = 0,
+    mealSum = 0,
+    mealRatingCount = 0;
   lastMeal.foodRatings.forEach((obj) => {
-    sum += obj.rating;
+    foodSum += obj.rating;
   });
-  const avgFood = sum / lastMeal.foodRatings.length;
+  const avgFood = foodSum / lastMeal.foodRatings.length;
+  keys.forEach((meal) => {
+    if (meal != "name") {
+      json[meal].mealRatings.forEach((obj) => {
+        mealSum += obj.rating;
+        mealRatingCount++;
+      });
+    }
+  });
+  const avgMeal = mealSum / mealRatingCount;
   const cacheLength = req.query.offset > 0 ? "2630000" : "3600";
   return res
     .setHeader("Cache-Control", `max-age=${cacheLength}, public`)
     .status(200)
     .json({
       foodAverage: avgFood,
+      mealAverage: avgMeal > 0 ? avgMeal : null,
       date: documentName.split("cafdata-")[1].split(".json")[0],
     });
 }

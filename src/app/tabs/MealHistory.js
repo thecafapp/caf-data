@@ -139,7 +139,7 @@ export default function MealHistory() {
                   markerValue={
                     computeMealAvg(dayData.meals[meal].mealRatings) * 20
                   }
-                  className="mt-2"
+                  className="mt-3"
                 />
               </Card>
             )}
@@ -173,20 +173,28 @@ export default function MealHistory() {
                       weekday: "long",
                     })}
                 </Title>
-                <List className="mb-10">
-                  {dayData.meals[meal].menu.map((m) => (
-                    <ListItem key={m}>
-                      <span className="capitalize">{m}</span>
-                      <span>
-                        {historicalFoodRating(
-                          m,
-                          dayData.meals[meal].foodRatings
-                        )}{" "}
-                        stars
-                      </span>
-                    </ListItem>
-                  ))}
-                </List>
+                {dayData.meals[meal].menu.length > 0 ? (
+                  <List className="mb-10">
+                    {dayData.meals[meal].menu.map((m) => (
+                      <ListItem key={m}>
+                        <span className="capitalize">{m}</span>
+                        <span>
+                          {historicalFoodRating(
+                            m,
+                            dayData.meals[meal].foodRatings
+                          )}{" "}
+                          stars
+                        </span>
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Flex justifyContent="center" className="mt-40 mb-40">
+                    <Subtitle>
+                      No menu available for the selected meal.
+                    </Subtitle>
+                  </Flex>
+                )}
                 <Flex className="bottom-5 absolute" justifyContent="start">
                   <Button
                     icon={DownloadIcon}
@@ -197,15 +205,17 @@ export default function MealHistory() {
                   >
                     Download data (JSON)
                   </Button>
-                  <Button
-                    icon={ClockIcon}
-                    iconPosition="right"
-                    disabled
-                    variant="primary"
-                    tooltip="Coming soon..."
-                  >
-                    Open food history
-                  </Button>
+                  {dayData.meals[meal].menu.length > 0 && (
+                    <Button
+                      icon={ClockIcon}
+                      iconPosition="right"
+                      disabled
+                      variant="primary"
+                      tooltip="Coming soon..."
+                    >
+                      Open food history
+                    </Button>
+                  )}
                 </Flex>
               </>
             ) : (

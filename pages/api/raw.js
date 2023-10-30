@@ -35,7 +35,10 @@ export default async function handler(req, res) {
   }
   const json = await documentFetch.json();
   return res
-    .setHeader("Cache-Control", `max-age=1200, public`)
+    .setHeader(
+      "Cache-Control",
+      `max-age=${req.query.item === "list" ? 600 : 1200}, public`
+    )
     .status(200)
     .json(
       documentName

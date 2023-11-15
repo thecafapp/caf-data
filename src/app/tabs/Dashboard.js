@@ -20,7 +20,7 @@ export default function Dashboard() {
   const [dayAverage, setDayAverage] = useState(null);
   const [avgDelta, setAvgDelta] = useState({
     name: "unchanged",
-    amount: "0.00",
+    amount: "0.0000",
   });
   useEffect(() => {
     fetch(`https://thecaf.app/api/foods?method=highest`)
@@ -42,27 +42,27 @@ export default function Dashboard() {
       .then((json) => {
         todayAverage = json.foodAverage;
         setDayAverage(json.foodAverage);
-      });
-    fetch(`/api/average?offset=1`)
-      .then((res) => res.json())
-      .then((json) => {
-        yesterdayAverage = json.foodAverage;
-        if (todayAverage > yesterdayAverage) {
-          setAvgDelta({
-            amount: Math.abs(todayAverage - yesterdayAverage).toFixed(2),
-            name: "increase",
+        fetch(`/api/average?offset=1`)
+          .then((res) => res.json())
+          .then((json) => {
+            yesterdayAverage = json.foodAverage;
+            if (todayAverage > yesterdayAverage) {
+              setAvgDelta({
+                amount: Math.abs(todayAverage - yesterdayAverage).toFixed(4),
+                name: "increase",
+              });
+            } else if (yesterdayAverage > todayAverage) {
+              setAvgDelta({
+                amount: Math.abs(todayAverage - yesterdayAverage).toFixed(4),
+                name: "decrease",
+              });
+            } else {
+              setAvgDelta({
+                amount: "0.0000",
+                name: "unchanged",
+              });
+            }
           });
-        } else if (yesterdayAverage > todayAverage) {
-          setAvgDelta({
-            amount: Math.abs(todayAverage - yesterdayAverage).toFixed(2),
-            name: "decrease",
-          });
-        } else {
-          setAvgDelta({
-            amount: "0.00",
-            name: "unchanged",
-          });
-        }
       });
   }, []);
   return (
@@ -111,11 +111,11 @@ export default function Dashboard() {
             <>
               <Flex>
                 <Text>Average Rating</Text>
-                <BadgeDelta deltaType={avgDelta.name}>
+                <BadgeDelta deltaType={avgDelta.name} tooltip={avgDelta.name}>
                   {avgDelta.amount}
                 </BadgeDelta>
               </Flex>
-              <Metric>{Number(dayAverage).toFixed(2)}</Metric>
+              <Metric>{Number(dayAverage).toFixed(4)}</Metric>
               <Text>
                 cumulative avg |{" "}
                 <a href="#/average" className="text-blue-500">

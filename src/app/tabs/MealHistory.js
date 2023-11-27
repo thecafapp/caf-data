@@ -89,10 +89,11 @@ export default function MealHistory() {
 
   const incDecDay = (incOrDec) => {
     const currentIndex = dates.findIndex((obj) => obj.name == day);
-    if (incOrDec == "inc" && currentIndex < dates.length) {
-      setDay(dates[currentIndex + 1].name);
-    } else if (incOrDec == "dec" && currentIndex > 0) {
+    if (currentIndex == -1) return;
+    if (incOrDec == "inc" && currentIndex > 0) {
       setDay(dates[currentIndex - 1].name);
+    } else if (incOrDec == "dec" && currentIndex < dates.length) {
+      setDay(dates[currentIndex + 1].name);
     }
   };
 

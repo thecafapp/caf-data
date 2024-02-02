@@ -35,7 +35,7 @@ export default function AverageOverTime() {
   const [timeInterval, setTimeInterval] = useState("1");
   const [numOfDataPoints, setNumOfDataPoints] = useState(30);
   const [selectedDot, setSelectedDot] = useState(null);
-  const [categories, setCategories] = useState(["Cumulative Food Rating"]);
+  const [categories, setCategories] = useState(["Meal Rating"]);
   const [dayData, setDayData] = useState(null);
 
   useEffect(() => {

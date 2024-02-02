@@ -20,6 +20,15 @@ export default async function handler(req, res) {
         `${process.env.CAFBUCKET}?fields=timeCreated`
       );
       const { objects: list } = await listFetch.json();
+      list.sort((a, b) => {
+        if (Date.parse(a.timeCreated) > Date.parse(b.timeCreated)) {
+          return 1;
+        } else if (Date.parse(a.timeCreated) < Date.parse(b.timeCreated)) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
       documentName = list[list.length - 1].name;
     }
     documentFetch = await fetch(`${process.env.CAFBUCKET}/${documentName}`);

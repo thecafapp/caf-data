@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       .status(404)
       .json({ error: "No data found." });
   }
-  const json = await documentFetch.json();
+  let json = await documentFetch.json();
   return res
     .setHeader(
       "Cache-Control",
@@ -46,6 +46,14 @@ export default async function handler(req, res) {
             meals: json,
             date: documentName.split("cafdata-")[1].split(".json")[0],
           }
-        : json.objects
+        : json.objects.sort((a, b) => {
+            if (Date.parse(a.timeCreated) > Date.parse(b.timeCreated)) {
+              return 1;
+            } else if (Date.parse(a.timeCreated) < Date.parse(b.timeCreated)) {
+              return -1;
+            } else {
+              return 0;
+            }
+          })
     );
 }

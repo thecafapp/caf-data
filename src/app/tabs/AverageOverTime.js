@@ -2,6 +2,7 @@ import {
   CalendarIcon,
   CubeTransparentIcon,
   CursorClickIcon,
+  CogIcon,
   ExclamationIcon,
   StarIcon,
 } from "@heroicons/react/outline";
@@ -33,7 +34,7 @@ import { useEffect, useState } from "react";
 export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
   const [timeInterval, setTimeInterval] = useState("1");
-  const [numOfDataPoints, setNumOfDataPoints] = useState(30);
+  const [numOfDataPoints, setNumOfDataPoints] = useState(25);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
   const [dayData, setDayData] = useState(null);
@@ -165,7 +166,12 @@ export default function AverageOverTime() {
               connectNulls={true}
             />
           ) : (
-            <Flex justifyContent="center" className="h-72 mt-3">
+            <Flex
+              justifyContent="center"
+              flexDirection="col"
+              className="h-72 mt-3"
+            >
+              <Icon icon={CogIcon} size="lg" className="animate-spin" />
               <Subtitle>Loading data...</Subtitle>
             </Flex>
           )}

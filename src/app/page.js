@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 
 import useWindowHash from "./hooks/useWindowHash";
 import Dashboard from "./tabs/Dashboard";
-import { HomeIcon } from "@heroicons/react/outline";
+import { HomeIcon } from "@heroicons/react/24/outline";
 import ComingSoon from "./tabs/ComingSoon";
 import AverageOverTime from "./tabs/AverageOverTime";
 import MealHistory from "./tabs/MealHistory";

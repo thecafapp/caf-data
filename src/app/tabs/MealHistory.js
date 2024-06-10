@@ -1,12 +1,12 @@
 import {
   CalendarIcon,
-  DownloadIcon,
-  ViewListIcon,
-  ExclamationIcon,
+  ArrowDownTrayIcon,
+  Bars3Icon,
+  ExclamationCircleIcon,
   ClockIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/24/outline";
 import {
   TabPanel,
   Card,
@@ -123,7 +123,7 @@ export default function MealHistory() {
               </Select>
               <Select
                 placeholder="Select meal..."
-                icon={ViewListIcon}
+                icon={Bars3Icon}
                 disabled={!day}
                 onValueChange={setMeal}
                 value={meal}
@@ -179,7 +179,7 @@ export default function MealHistory() {
             <Card>
               <Callout
                 title="Data disclaimer"
-                icon={ExclamationIcon}
+                icon={ExclamationCircleIcon}
                 color="yellow"
               >
                 Ratings shown in the menu are recorded as of the meal date. To
@@ -230,7 +230,7 @@ export default function MealHistory() {
                 )}
                 <Flex className="bottom-5 absolute" justifyContent="start">
                   <Button
-                    icon={DownloadIcon}
+                    icon={ArrowDownTrayIcon}
                     iconPosition="right"
                     variant="secondary"
                     onClick={downloadData}

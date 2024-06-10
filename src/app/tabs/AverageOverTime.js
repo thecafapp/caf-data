@@ -1,11 +1,11 @@
 import {
   CalendarIcon,
   CubeTransparentIcon,
-  CursorClickIcon,
-  CogIcon,
-  ExclamationIcon,
+  CursorArrowRaysIcon,
+  Cog6ToothIcon,
+  ExclamationCircleIcon,
   StarIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/24/outline";
 import {
   TabPanel,
   Card,
@@ -33,11 +33,12 @@ import {
 import { useEffect, useState } from "react";
 export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
-  const [timeInterval, setTimeInterval] = useState("1");
-  const [numOfDataPoints, setNumOfDataPoints] = useState(25);
+  const [timeInterval, setTimeInterval] = useState("7");
+  const [numOfDataPoints, setNumOfDataPoints] = useState(20);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
   const [dayData, setDayData] = useState(null);
+  const [actualScale, setActualScale] = useState("no");
 
   useEffect(() => {
     console.log("CHANGE!", selectedDot);
@@ -121,6 +122,14 @@ export default function AverageOverTime() {
           <Flex justifyContent="between">
             <Title>Average Rating Over Time</Title>
             <Flex className="w-85">
+              <Select
+                value={actualScale}
+                onChange={setActualScale}
+                className="w-40 mr-2"
+              >
+                <SelectItem value="no">Proportional scale</SelectItem>
+                <SelectItem value="yes">Actual scale</SelectItem>
+              </Select>
               <NumberInput
                 className="w-20 mr-2"
                 max={60}
@@ -161,9 +170,10 @@ export default function AverageOverTime() {
               onValueChange={setSelectedDot}
               categories={categories}
               colors={["blue", "indigo"]}
-              autoMinValue={true}
+              autoMinValue={actualScale === "no"}
               showAnimation={true}
               connectNulls={true}
+              maxValue={5}
             />
           ) : (
             <Flex
@@ -171,7 +181,7 @@ export default function AverageOverTime() {
               flexDirection="col"
               className="h-72 mt-3"
             >
-              <Icon icon={CogIcon} size="lg" className="animate-spin" />
+              <Icon icon={Cog6ToothIcon} size="lg" className="animate-spin" />
               <Subtitle>Loading data...</Subtitle>
             </Flex>
           )}
@@ -246,7 +256,7 @@ export default function AverageOverTime() {
               ) : (
                 <Flex flexDirection="col">
                   <Icon
-                    icon={CursorClickIcon}
+                    icon={CursorArrowRaysIcon}
                     size="lg"
                     variant="light"
                     className="mb-1"
@@ -259,7 +269,7 @@ export default function AverageOverTime() {
           <Card className="h-max">
             <Callout
               title="Data disclaimer"
-              icon={ExclamationIcon}
+              icon={ExclamationCircleIcon}
               color="yellow"
             >
               This chart only has access to data since August 17, 2023. It must

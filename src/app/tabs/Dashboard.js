@@ -9,7 +9,7 @@ import {
   TabPanel,
   Grid,
 } from "@tremor/react";
-import { StarIcon } from "@heroicons/react/outline";
+import { StarIcon } from "@heroicons/react/24/outline";
 import FoodTable from "../components/FoodTable";
 
 export default function Dashboard() {
@@ -127,20 +127,22 @@ export default function Dashboard() {
         </Card>
       </Grid>
       <div className="mt-6">
-        <FoodTable
-          title="Top Foods All Time"
-          foods={popularFoods}
-          color="green"
-          id="top-foods"
-        />
+        <Card>
+          <FoodTable
+            title="Top Foods All Time"
+            foods={popularFoods}
+            color="green"
+          />
+        </Card>
       </div>
       <div className="mt-6">
-        <FoodTable
-          title="Worst Foods All Time"
-          foods={worstFoods}
-          color="red"
-          id="worst-foods"
-        />
+        <Card>
+          <FoodTable
+            title="Worst Foods All Time"
+            foods={worstFoods}
+            color="red"
+          />
+        </Card>
       </div>
     </TabPanel>
   );

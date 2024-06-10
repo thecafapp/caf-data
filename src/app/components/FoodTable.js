@@ -1,5 +1,4 @@
 import {
-  Card,
   Title,
   Text,
   Table,
@@ -11,17 +10,28 @@ import {
   Badge,
 } from "@tremor/react";
 
-export default function FoodTable({ foods, color, title = "Foods", id }) {
+export default function FoodTable({
+  foods,
+  color = "blue",
+  title = "Foods",
+  showId = true,
+  showTitle = true,
+  customLastColumn = null,
+  customLastColumnTitle = "",
+}) {
   return (
-    <Card id={id}>
-      <Title>{title}</Title>
+    <>
+      {showTitle && <Title>{title}</Title>}
       <Table className="mt-3">
         <TableHead>
           <TableRow>
             <TableHeaderCell>Name</TableHeaderCell>
             <TableHeaderCell>Score</TableHeaderCell>
             <TableHeaderCell>Ratings</TableHeaderCell>
-            <TableHeaderCell>ID</TableHeaderCell>
+            {showId && <TableHeaderCell>ID</TableHeaderCell>}
+            {!!customLastColumn && (
+              <TableHeaderCell>{customLastColumnTitle}</TableHeaderCell>
+            )}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -34,13 +44,18 @@ export default function FoodTable({ foods, color, title = "Foods", id }) {
               <TableCell>
                 <Text>{item.ratings}</Text>
               </TableCell>
-              <TableCell>
-                <Text>{item._id}</Text>
-              </TableCell>
+              {showId && (
+                <TableCell>
+                  <Text>{item._id}</Text>
+                </TableCell>
+              )}
+              {!!customLastColumn && (
+                <TableCell>{customLastColumn(item)}</TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </Card>
+    </>
   );
 }

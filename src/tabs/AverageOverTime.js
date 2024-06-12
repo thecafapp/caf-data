@@ -41,7 +41,6 @@ export default function AverageOverTime() {
   const [actualScale, setActualScale] = useState("no");
 
   useEffect(() => {
-    console.log("CHANGE!", selectedDot);
     if (selectedDot?.eventType == "dot" && selectedDot?.date) {
       fetch(`/api/raw?file=cafdata-${selectedDot.date}.json`)
         .then((res) => res.json())
@@ -93,6 +92,10 @@ export default function AverageOverTime() {
       setTimeout(loadChart, 1000);
     }
   }, [timeInterval, numOfDataPoints]);
+
+  useEffect(() => {
+    console.log(chartData);
+  }, [chartData]);
 
   const computeMealAvg = (ratingArray) => {
     let sum = 0,
@@ -174,6 +177,8 @@ export default function AverageOverTime() {
               showAnimation={true}
               connectNulls={true}
               maxValue={5}
+              yAxisLabel="Stars"
+              xAxisLabel="Date"
             />
           ) : (
             <Flex

@@ -6,8 +6,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Caf Data by The Caf App",
   description: "A dashboard for historical rating data from The Caf App",
+
   keywords:
-    "cafapp,caf,cafeteria,mississippi college,mc,the caf app,thecafapp,thecaf.app,mississippi,college",
+    "cafapp,caf,cafeteria,mississippi college,mc,the caf app,thecafapp,thecaf.app,mississippi,college"
 };
 
 export default function RootLayout({ children }) {

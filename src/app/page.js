@@ -14,14 +14,17 @@ import {
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import useWindowHash from "./hooks/useWindowHash";
-import Dashboard from "./tabs/Dashboard";
+import useWindowHash from "../hooks/useWindowHash";
+import Dashboard from "../tabs/Dashboard";
 import { HomeIcon } from "@heroicons/react/24/outline";
-import ComingSoon from "./tabs/ComingSoon";
-import AverageOverTime from "./tabs/AverageOverTime";
-import MealHistory from "./tabs/MealHistory";
+import ComingSoon from "../tabs/ComingSoon";
+import AverageOverTime from "../tabs/AverageOverTime";
+import MealHistory from "../tabs/MealHistory";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const nextRouter = useRouter();
+
   const dashboardTab = useRef(null);
   const averageTab = useRef(null);
   const foodTab = useRef(null);
@@ -126,6 +129,7 @@ export default function Home() {
             <Tab ref={averageTab}>Ratings Over Time</Tab>
             <Tab ref={foodTab}>Individual Foods</Tab>
             <Tab ref={mealsTab}>Meal History</Tab>
+            <Tab onClick={() => nextRouter.push("/login")}>Admin</Tab>
           </TabList>
           <TabPanels>
             <Dashboard />

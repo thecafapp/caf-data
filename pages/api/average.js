@@ -39,6 +39,7 @@ export default async function handler(req, res) {
     } else {
       documentName = list[list.length - 1].name;
       documentFetch = await fetch(`${process.env.CAFBUCKET}/${documentName}`);
+      console.log(`${process.env.CAFBUCKET}/${documentName}`);
     }
   }
   if (documentFetch.status != 200) {

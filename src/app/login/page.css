@@ -1,0 +1,18 @@
+#firebaseui-auth-container
+  > div
+  > div.firebaseui-card-content
+  > form
+  > ul
+  > li
+  > button {
+  background-color: #172554 !important;
+  border: none;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  font-size: 16px;
+  width: 100%;
+}
+
+.firebaseui-idp-text.firebaseui-idp-text-long {
+  color: #e5e7eb !important;
+}

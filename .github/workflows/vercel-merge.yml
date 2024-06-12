@@ -6,6 +6,9 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://data.thecaf.app
     steps:
       - uses: actions/checkout@v2
       - uses: amondnet/vercel-action@v25

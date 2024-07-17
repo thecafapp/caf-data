@@ -91,17 +91,19 @@ export default function FoodList({
             .map((food) => (
               <SearchSelectItem
                 value={food._id}
-                className="cursor-pointer"
+                className="cursor-pointer searchselectorderinvert"
                 key={food._id}
+                icon={() => (
+                  <RatingBadge
+                    rating={food.rating}
+                    ratingCount={food.ratings}
+                    showIcon={false}
+                    size="xs"
+                    className="ml-2 order-last"
+                  />
+                )}
               >
                 {uppercaseFirstLetter(food.name)}
-                <RatingBadge
-                  rating={food.rating}
-                  ratingCount={food.ratings}
-                  showIcon={false}
-                  size="xs"
-                  className="ml-2"
-                />
               </SearchSelectItem>
             ))}
         </SearchSelect>

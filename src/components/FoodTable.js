@@ -9,10 +9,10 @@ import {
   TableCell,
   Badge,
 } from "@tremor/react";
+import RatingBadge from "../components/RatingBadge";
 
 export default function FoodTable({
   foods,
-  color = "blue",
   title = "Foods",
   showId = true,
   showTitle = true,
@@ -39,7 +39,7 @@ export default function FoodTable({
             <TableRow key={item._id}>
               <TableCell className="capitalize">{item.name}</TableCell>
               <TableCell>
-                <Badge color={color}>{Number(item.rating).toFixed(2)}</Badge>
+                <RatingBadge rating={item.rating} ratingCount={item.ratings} />
               </TableCell>
               <TableCell>
                 <Text>{item.ratings}</Text>

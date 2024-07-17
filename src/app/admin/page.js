@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import useSWR from "swr";
 import {
   Flex,
   Title,
@@ -11,10 +12,6 @@ import {
   Icon,
   List,
   ListItem,
-  Select,
-  SelectItem,
-  SearchSelect,
-  SearchSelectItem,
   Table,
   TableHead,
   TableRow,
@@ -23,25 +20,25 @@ import {
   TableCell,
   TextInput,
 } from "@tremor/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import {
   ArrowLeftIcon,
   ArrowUpLeftIcon,
   CheckIcon,
-  ClockIcon,
   CubeTransparentIcon,
-  MagnifyingGlassIcon,
   PlusIcon,
   TrashIcon,
   UserMinusIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { Calendar } from "../../components/TremorCalendar";
 import TimeInput from "../../components/TimeInput";
 import { useEffect, useState } from "react";
-import FoodTable from "../../components/FoodTable";
+import FoodList from "../../components/admin/FoodList";
 import useFirebaseUser from "../../hooks/useFirebaseUser";
+import useHasChanged from "../../hooks/useHasChanged";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
   authDomain: "login.thecaf.app",
@@ -51,20 +48,74 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 export default function Admin() {
+  const params = useSearchParams();
+  const [date, setDate] = useState(
+    params.get("date") ? new Date(params.get("date")) : new Date()
+  );
+  const { data, isLoading, mutate } = useSWR(
+    `/api/meals?date=${date.toLocaleDateString("en-CA")}`,
+    (url) => fetch(url).then((res) => res.json())
+  );
   const user = useFirebaseUser();
   const nextRouter = useRouter();
-  const [date, setDate] = useState(new Date());
   const [editedMealtimeDay, setEditedMealtimeDay] = useState(null);
+  const [mealtime, setMealtime] = useState(0);
+  const [updated, setUpdated] = useState(null);
+  const [mealFoods, setMealFoods] = useState([]);
+
+  const datahasChanged = useHasChanged(data);
+
   const signOutUser = () => {
     firebase.auth().signOut();
-    // .then(() => nextRouter.push("/login"));
   };
+
+  useEffect(() => {
+    if (!!data && mealtime != undefined) {
+      fetch("/api/foods", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data.meals[mealtime].menu),
+      })
+        .then((res) => res.json())
+        .then((m) => setMealFoods(m));
+    }
+  }, [mealtime, data]);
 
   useEffect(() => {
     if (user === false) {
       nextRouter.push("/login");
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      user.getIdToken().then((token) => {
+        mutate(async () => {
+          await fetch("/api/meals", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-firebase-token": token,
+            },
+            body: JSON.stringify(updated),
+          });
+        });
+      });
+    }
+  }, [updated]);
+
+  const compareObjects = (obj1, obj2) => {
+    if (Array.isArray(obj1)) {
+      obj1 = obj1.sort();
+      obj2 = obj2.sort();
+    }
+    return typeof obj1 === "object" && Object.keys(obj1).length > 0
+      ? Object.keys(obj1).length === Object.keys(obj2).length &&
+          Object.keys(obj1).every((p) => compareObjects(obj1[p], obj2[p]))
+      : obj1 === obj2;
+  };
 
   return (
     <main className="p-8 max-w-screen-xl m-auto">
@@ -109,63 +160,58 @@ export default function Admin() {
       </Flex>
       <Flex className="mt-6 gap-6 items-stretch">
         <Card className="w-max">
-          <Calendar onSelect={(d) => setDate(d)} selected={date} />
+          <Calendar
+            onSelect={(d) => {
+              if (d < new Date() - 86400000) {
+                nextRouter.push(
+                  "/#meals?date=" +
+                    d
+                      .toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
+                      .replaceAll("/", "-")
+                );
+                return;
+              } else {
+                setDate(d);
+              }
+            }}
+            selected={date}
+          />
         </Card>
-        <Card className="h-auto">
-          <Flex className="gap-3">
-            <Title className="w-auto whitespace-nowrap flex-1">
-              Menu for{" "}
-              {date.toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })}
-            </Title>
-
-            <Select className="w-max" defaultValue="Breakfast" icon={ClockIcon}>
-              <SelectItem value="Breakfast">Breakfast</SelectItem>
-              <SelectItem value="Lunch">Lunch</SelectItem>
-              <SelectItem value="Dinner">Dinner</SelectItem>
-            </Select>
-            <SearchSelect
-              className="w-max"
-              defaultValue="Breakfast"
-              icon={MagnifyingGlassIcon}
+        {isLoading ? (
+          <Card>
+            <Flex
+              justifyContent="center"
+              flexDirection="col"
+              className="h-72 mt-3"
             >
-              <SearchSelectItem value="Breakfast">
-                Chicken Nuggets
-              </SearchSelectItem>
-              <SearchSelectItem value="Lunch">Pasta Salad</SearchSelectItem>
-              <SearchSelectItem value="Dinner">
-                Mac & Cheese Bowl
-              </SearchSelectItem>
-            </SearchSelect>
-          </Flex>
-          <FoodTable
-            showId={false}
-            showTitle={false}
-            customLastColumn={(food) => (
-              <>
-                <Button
-                  icon={TrashIcon}
-                  className="float-end"
-                  size="xs"
-                  variant="secondary"
-                  color="red"
-                >
-                  Remove from meal
-                </Button>
-              </>
-            )}
-            customLastColumnTitle=""
-            foods={[
-              { name: "Waffles", rating: 4, ratings: 3, _id: 302 },
-              { name: "Breakfast Bowl", rating: 4.7, ratings: 3, _id: 305 },
-              { name: "Egg Drop Soup", rating: 3.6, ratings: 3, _id: 307 },
-              { name: "Boiled Eggs", rating: 3, ratings: 3, _id: 300 },
-            ]}
-          ></FoodTable>
-        </Card>
+              <Icon icon={Cog6ToothIcon} size="lg" className="animate-spin" />
+              <Subtitle>Loading data...</Subtitle>
+            </Flex>
+          </Card>
+        ) : (
+          <FoodList
+            heading={`Menu for
+          ${date.toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}`}
+            foods={mealFoods}
+            setFoods={(arr) => {
+              const meals = [...data.meals];
+              meals[mealtime].menu = arr.map((f) => f.name);
+              setUpdated({ ...data, meals });
+            }}
+            meals={data?.meals}
+            setMeal={(name) => {
+              setMealtime(data.meals.findIndex((m) => m.name == name));
+            }}
+          />
+        )}
       </Flex>
       <Flex className="mt-6 gap-6 items-stretch">
         <Card>

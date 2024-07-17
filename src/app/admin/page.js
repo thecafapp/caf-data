@@ -20,7 +20,7 @@ import {
   TableCell,
   TextInput,
 } from "@tremor/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import {
@@ -47,10 +47,10 @@ const firebaseConfig = {
   appId: "1:545159752910:web:bd66c8c0e7e0b2d0d6f49f",
 };
 firebase.initializeApp(firebaseConfig);
-export default function Admin() {
-  const params = useSearchParams();
+export default function Admin({ searchParams }) {
+  const params = searchParams;
   const [date, setDate] = useState(
-    params.get("date") ? new Date(params.get("date")) : new Date()
+    params?.data ? new Date(params?.date) : new Date()
   );
   const { data, isLoading, mutate } = useSWR(
     `/api/meals?date=${date.toLocaleDateString("en-CA")}`,

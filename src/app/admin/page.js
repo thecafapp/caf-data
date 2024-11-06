@@ -32,8 +32,10 @@ import {
   TrashIcon,
   UserMinusIcon,
   Cog6ToothIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 import { Calendar } from "../../components/TremorCalendar";
+import { Tooltip } from "../../components/TremorTooltip";
 import TimeInput from "../../components/TimeInput";
 import { useEffect, useState } from "react";
 import FoodList from "../../components/admin/FoodList";
@@ -47,6 +49,7 @@ const firebaseConfig = {
   appId: "1:545159752910:web:bd66c8c0e7e0b2d0d6f49f",
 };
 firebase.initializeApp(firebaseConfig);
+
 export default function Admin({ searchParams }) {
   const params = searchParams;
   const [date, setDate] = useState(
@@ -68,6 +71,13 @@ export default function Admin({ searchParams }) {
   const signOutUser = () => {
     firebase.auth().signOut();
   };
+
+  useEffect(() => {
+    document.querySelector("html").classList.toggle(
+      'dark',
+      localStorage.getItem("theme") === 'dark' || (!(localStorage.getItem("theme")) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    );
+  }, []);
 
   useEffect(() => {
     if (!!data && mealtime != undefined) {
@@ -106,6 +116,18 @@ export default function Admin({ searchParams }) {
     }
   }, [updated]);
 
+  const changeTheme = () => {
+    if (localStorage.getItem("theme") === "dark") {
+      localStorage.setItem("theme", "light");
+    } else {
+      localStorage.setItem("theme", "dark");
+    }
+    document.querySelector("html").classList.toggle(
+      'dark',
+      localStorage.getItem("theme") === 'dark' || (!(localStorage.getItem("theme")) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    );
+  }
+
   const compareObjects = (obj1, obj2) => {
     if (Array.isArray(obj1)) {
       obj1 = obj1.sort();
@@ -113,7 +135,7 @@ export default function Admin({ searchParams }) {
     }
     return typeof obj1 === "object" && Object.keys(obj1).length > 0
       ? Object.keys(obj1).length === Object.keys(obj2).length &&
-          Object.keys(obj1).every((p) => compareObjects(obj1[p], obj2[p]))
+      Object.keys(obj1).every((p) => compareObjects(obj1[p], obj2[p]))
       : obj1 === obj2;
   };
 
@@ -143,7 +165,6 @@ export default function Admin({ searchParams }) {
           color="gray"
           onClick={() => nextRouter.push("/")}
           icon={ArrowUpLeftIcon}
-          tooltip="Go back to the data dashboard"
           className="mr-2"
         >
           Back to Data
@@ -151,12 +172,21 @@ export default function Admin({ searchParams }) {
         <Button
           variant="secondary"
           color="gray"
-          onClick={() => signOutUser()}
+          onClick={signOutUser}
           icon={UserMinusIcon}
-          tooltip="Sign out of the admin panel"
+          className="mr-2"
         >
           Sign Out
         </Button>
+        <Tooltip side="bottom" content="Change theme">
+          <Button
+            variant="secondary"
+            color="gray"
+            onClick={changeTheme}
+            icon={MoonIcon}
+          >
+          </Button>
+        </Tooltip>
       </Flex>
       <Flex className="mt-6 gap-6 items-stretch">
         <Card className="w-max">
@@ -165,13 +195,13 @@ export default function Admin({ searchParams }) {
               if (d < new Date() - 86400000) {
                 nextRouter.push(
                   "/#meals?date=" +
-                    d
-                      .toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                      })
-                      .replaceAll("/", "-")
+                  d
+                    .toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })
+                    .replaceAll("/", "-")
                 );
                 return;
               } else {
@@ -196,10 +226,10 @@ export default function Admin({ searchParams }) {
           <FoodList
             heading={`Menu for
           ${date.toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}`}
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}`}
             foods={mealFoods}
             setFoods={(arr) => {
               const meals = [...data.meals];

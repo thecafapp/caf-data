@@ -38,6 +38,10 @@ export default function Home() {
   }, [hash]);
 
   useEffect(() => {
+    document.querySelector("html").classList.toggle(
+      'dark',
+      localStorage.getItem("theme") === 'dark' || (!(localStorage.getItem("theme")) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    );
     route(window.location.hash);
   }, []);
 

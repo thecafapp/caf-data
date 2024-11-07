@@ -19,6 +19,7 @@ import {
   TableBody,
   TableCell,
   TextInput,
+  Callout,
 } from "@tremor/react";
 import { useRouter } from "next/navigation";
 import firebase from "firebase/compat/app";
@@ -33,7 +34,10 @@ import {
   UserMinusIcon,
   Cog6ToothIcon,
   MoonIcon,
+  ArrowDownIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
+import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "../../components/TremorDrawer";
 import { Calendar } from "../../components/TremorCalendar";
 import { Tooltip } from "../../components/TremorTooltip";
 import TimeInput from "../../components/TimeInput";
@@ -41,6 +45,8 @@ import { useEffect, useState } from "react";
 import FoodList from "../../components/admin/FoodList";
 import useFirebaseUser from "../../hooks/useFirebaseUser";
 import useHasChanged from "../../hooks/useHasChanged";
+import { Label } from "../../components/TremorLabel";
+import { CardHeader } from "@nextui-org/react";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
   authDomain: "login.thecaf.app",
@@ -65,6 +71,13 @@ export default function Admin({ searchParams }) {
   const [mealtime, setMealtime] = useState(0);
   const [updated, setUpdated] = useState(null);
   const [mealFoods, setMealFoods] = useState([]);
+  const [exception, setException] = useState(null);
+  const [exceptionInputs, setExceptionInputs] = useState({
+    name: "",
+    start: "",
+    end: ""
+  })
+  const [exceptionFormOpen, setExceptionFormOpen] = useState(false);
 
   const datahasChanged = useHasChanged(data);
 
@@ -80,6 +93,7 @@ export default function Admin({ searchParams }) {
   }, []);
 
   useEffect(() => {
+    console.log('Data change\n', data);
     if (!!data && mealtime != undefined) {
       fetch("/api/foods", {
         method: "POST",
@@ -100,17 +114,23 @@ export default function Admin({ searchParams }) {
   }, [user]);
 
   useEffect(() => {
+    console.log("UPDATED", updated);
     if (user) {
       user.getIdToken().then((token) => {
+        console.log("Mutate");
         mutate(async () => {
           await fetch("/api/meals", {
             method: "POST",
+            cache: 'no-store',
             headers: {
               "Content-Type": "application/json",
               "x-firebase-token": token,
             },
             body: JSON.stringify(updated),
           });
+        }, {
+          optimisticData: updated,
+          revalidate: true
         });
       });
     }
@@ -178,7 +198,7 @@ export default function Admin({ searchParams }) {
         >
           Sign Out
         </Button>
-        <Tooltip side="bottom" content="Change theme">
+        <Tooltip side="bottom" content="Change theme" triggerAsChild={true}>
           <Button
             variant="secondary"
             color="gray"
@@ -211,7 +231,7 @@ export default function Admin({ searchParams }) {
             selected={date}
           />
         </Card>
-        {isLoading ? (
+        {!data && isLoading ? (
           <Card>
             <Flex
               justifyContent="center"
@@ -232,6 +252,7 @@ export default function Admin({ searchParams }) {
             })}`}
             foods={mealFoods}
             setFoods={(arr) => {
+              console.log(arr);
               const meals = [...data.meals];
               meals[mealtime].menu = arr.map((f) => f.name);
               setUpdated({ ...data, meals });
@@ -244,7 +265,7 @@ export default function Admin({ searchParams }) {
         )}
       </Flex>
       <Flex className="mt-6 gap-6 items-stretch">
-        <Card>
+        <Card className="w-3/5">
           {!editedMealtimeDay ? (
             <>
               <Title>Recurring Mealtimes</Title>
@@ -307,10 +328,10 @@ export default function Admin({ searchParams }) {
                       <TextInput defaultValue="Breakfast"></TextInput>
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="7:00 AM"></TimeInput>
+                      <TimeInput value="7:00 AM" />
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="9:00 AM"></TimeInput>
+                      <TimeInput value="9:00 AM" />
                     </TableCell>
                     <TableCell>
                       <Icon
@@ -325,10 +346,10 @@ export default function Admin({ searchParams }) {
                       <TextInput defaultValue="Lunch"></TextInput>
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="10:30 AM"></TimeInput>
+                      <TimeInput value="10:30 AM" />
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="2:00 PM"></TimeInput>
+                      <TimeInput value="2:00 PM" />
                     </TableCell>
                     <TableCell>
                       <Icon
@@ -343,10 +364,10 @@ export default function Admin({ searchParams }) {
                       <TextInput defaultValue="Dinner"></TextInput>
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="4:30 AM"></TimeInput>
+                      <TimeInput value="4:30 AM" />
                     </TableCell>
                     <TableCell>
-                      <TimeInput value="7:00 PM"></TimeInput>
+                      <TimeInput value="7:00 PM" />
                     </TableCell>
                     <TableCell>
                       <Icon
@@ -364,9 +385,9 @@ export default function Admin({ searchParams }) {
             </>
           )}
         </Card>
-        <Card>
+        <Card className="w-2/5">
           <Title>Mealtime Exception</Title>
-          <Flex justifyContent="center" flexDirection="col" className="h-full">
+          {!exception ? <Flex justifyContent="center" flexDirection="col" className="h-full">
             <Icon
               icon={CubeTransparentIcon}
               size="lg"
@@ -374,12 +395,83 @@ export default function Admin({ searchParams }) {
               className="mb-1"
             />
             <Subtitle color="slate" className="text-sm mb-3">
-              No custom mealtime is set for the selected date.
+              The selected meal has not been customized.
             </Subtitle>
-            <Button className="mb-6">Add an exception</Button>
-          </Flex>
+            {!!data && <Button className="mb-6" onClick={() => {
+              setExceptionInputs({
+                name: data.meals[mealtime].name,
+                start: new Date(data.meals[mealtime].start).toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit' }),
+                end: new Date(data.meals[mealtime].end).toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit' })
+              });
+              setExceptionFormOpen(true)
+            }}>Add an exception</Button>}
+          </Flex> :
+            <>
+              {!!data && <Card className="mt-4 opacity-65">
+                <p className="italic">{data.meals[mealtime].name} from {data.meals[mealtime].times}</p>
+              </Card>}
+              <Icon
+                icon={ArrowDownIcon}
+                size="lg"
+                className="my-4 mx-auto w-full"
+                variant="simple"
+              />
+              <Card color="blue">
+                <p className="font-bold">{exception.name} from {exception.start} - {exception.end}</p>
+              </Card>
+              <Flex className="mt-4 items-center justify-center gap-2" alignItems="center">
+                <Button variant="primary" icon={PencilIcon} onClick={() => setExceptionFormOpen(true)}>Edit</Button>
+                <Button variant="secondary" icon={TrashIcon} onClick={() => setExceptionFormOpen(true)}>Delete</Button>
+              </Flex>
+            </>}
         </Card>
       </Flex>
+      <Drawer
+        open={exceptionFormOpen}
+        onOpenChange={(modalOpened) => {
+          if (!modalOpened) {
+            setExceptionFormOpen(false);
+          }
+        }}
+      >
+        <DrawerContent className="sm:max-w-lg">
+          <DrawerHeader>
+            <DrawerTitle>Exception editor</DrawerTitle>
+            {!!data && <DrawerDescription className="mt-1 text-sm">
+              {data.meals[mealtime].name} on {data.date}
+            </DrawerDescription>}
+          </DrawerHeader>
+          <DrawerBody>
+            <Label htmlFor="exceptionMealName">Meal name</Label>
+            <TextInput name="exceptionMealName" placeholder="Meal name" value={exceptionInputs.name} onValueChange={(v) => setExceptionInputs({ ...exceptionInputs, name: v })} />
+            <div className="grid grid-cols-2 mt-4 mb-4 gap-x-4">
+              <Label htmlFor="exceptionStart" className="mb-1">Start Time</Label>
+              <Label htmlFor="exceptionEnd" className="mb-1">End Time</Label>
+              <TimeInput name="exceptionStart" value={exceptionInputs.start} onChange={(e) => setExceptionInputs({ ...exceptionInputs, start: e.target.value })} />
+              <TimeInput name="exceptionEnd" value={exceptionInputs.end} onChange={(e) => setExceptionInputs({ ...exceptionInputs, end: e.target.value })} />
+            </div>
+            <Callout title="About exceptions" color="yellow">
+              Exceptions allow changing meal times and names on specific dates.  These are designed to override regular meals, and if there is to be a permanent change in schedule or naming you should use the Recurring Mealtimes panel.
+            </Callout>
+          </DrawerBody>
+          <DrawerFooter className="mt-6">
+            <DrawerClose asChild>
+              <Button
+                className="mt-2 w-full sm:mt-0 sm:w-fit"
+                variant="secondary"
+              >
+                Cancel
+              </Button>
+            </DrawerClose>
+            <Button className="w-full sm:w-fit" onClick={() => {
+              setException(exceptionInputs);
+              setExceptionFormOpen(false);
+            }}>
+              Save exception
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </main>
   );
 }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import FoodTable from "../../components/FoodTable";
-import useHasChanged from "../../hooks/useHasChanged";
 import RatingBadge from "../../components/RatingBadge";
 import {
   QuestionMarkCircleIcon,
@@ -19,11 +18,13 @@ import {
   SelectItem,
   SearchSelect,
   SearchSelectItem,
+  Badge,
 } from "@tremor/react";
+import { Tooltip } from "../TremorTooltip";
+
 export default function FoodList({
   foods,
   setFoods,
-  meal,
   setMeal,
   meals,
   heading,
@@ -31,6 +32,10 @@ export default function FoodList({
   const [foodQuery, setFoodQuery] = useState("");
   const [searchFoods, setSearchFoods] = useState([]);
   const [selectedFood, setSelectedFood] = useState("");
+
+  useEffect(() => {
+    console.log("FOODS\n", foods);
+  }, [foods])
 
   useEffect(() => {
     if (foodQuery) {
@@ -44,6 +49,15 @@ export default function FoodList({
 
   useEffect(() => {
     if (selectedFood) {
+      if (selectedFood === "create") {
+        setFoods([...foods, {
+          id: (Math.random() * 100000).toString(),
+          name: foodQuery.toLowerCase(),
+          rating: 0,
+          ratings: 0
+        }])
+        return;
+      }
       const f = [...foods, searchFoods.find((f) => f._id == selectedFood)];
       setFoods(f);
       setSelectedFood("");
@@ -91,7 +105,7 @@ export default function FoodList({
             .map((food) => (
               <SearchSelectItem
                 value={food._id}
-                className="cursor-pointer searchselectorderinvert"
+                className="searchselectorderinvert cursor-pointer"
                 key={food._id}
                 icon={() => (
                   <RatingBadge
@@ -106,6 +120,13 @@ export default function FoodList({
                 {uppercaseFirstLetter(food.name)}
               </SearchSelectItem>
             ))}
+          {foodQuery.length > 2 && <SearchSelectItem value="create" className="cursor-pointer" icon={() => (
+            <Badge
+              size="xs"
+              className="ml-2 order-last"
+              color="blue"
+            >Create new</Badge>
+          )}>{foodQuery}</SearchSelectItem>}
         </SearchSelect>
       </Flex>
       {foods.length > 0 ? (
@@ -113,24 +134,23 @@ export default function FoodList({
           showId={false}
           showTitle={false}
           customLastColumn={(food) => (
-            <>
+            <Tooltip side="left" content="Remove from meal" triggerAsChild={true}>
               <Button
                 icon={TrashIcon}
                 className="float-end"
                 size="xs"
                 variant="secondary"
                 color="red"
-                onClick={() => {
-                  setFoods((foods) => foods.filter((f) => f._id != food._id));
-                }}
-              >
-                Remove from meal
-              </Button>
-            </>
-          )}
+                onClick={() =>
+                  setFoods(foods.filter((f) => f._id != food._id))
+                }
+              />
+            </Tooltip>
+          )
+          }
           customLastColumnTitle=""
           foods={foods}
-        ></FoodTable>
+        ></FoodTable >
       ) : (
         <Flex justifyContent="center" flexDirection="col" className="h-full">
           <Icon
@@ -144,6 +164,6 @@ export default function FoodList({
           </Subtitle>
         </Flex>
       )}
-    </Card>
+    </Card >
   );
 }

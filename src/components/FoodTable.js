@@ -7,7 +7,6 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
-  Badge,
 } from "@tremor/react";
 import RatingBadge from "../components/RatingBadge";
 
@@ -27,7 +26,6 @@ export default function FoodTable({
           <TableRow>
             <TableHeaderCell>Name</TableHeaderCell>
             <TableHeaderCell>Score</TableHeaderCell>
-            <TableHeaderCell>Ratings</TableHeaderCell>
             {showId && <TableHeaderCell>ID</TableHeaderCell>}
             {!!customLastColumn && (
               <TableHeaderCell>{customLastColumnTitle}</TableHeaderCell>
@@ -36,13 +34,10 @@ export default function FoodTable({
         </TableHead>
         <TableBody>
           {foods.map((item) => (
-            <TableRow key={item._id}>
+            <TableRow key={item._id + Math.random()}>
               <TableCell className="capitalize">{item.name}</TableCell>
               <TableCell>
                 <RatingBadge rating={item.rating} ratingCount={item.ratings} />
-              </TableCell>
-              <TableCell>
-                <Text>{item.ratings}</Text>
               </TableCell>
               {showId && (
                 <TableCell>

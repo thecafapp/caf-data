@@ -22,8 +22,19 @@ export default async function handler(req, res) {
     await client.connect();
     const db = client.db(dbName);
     const collection = db.collection("foods");
-    const food = await collection.find({ name: { $in: req.body } }).toArray();
+    const newBody = req.body.map((f) => f.toLowerCase());
+    const foods = await collection.find({ name: { $in: newBody } }).toArray();
     client.close();
-    return res.status(200).json(food);
+    req.body.forEach((food) => {
+      if (foods.findIndex((f) => f.name.toLowerCase() == food.toLowerCase()) == -1) {
+        foods.push({
+          _id: `${Math.random() * 10000}`,
+          name: food.toLowerCase(),
+          rating: 0,
+          ratings: 0
+        })
+      }
+    })
+    return res.status(200).json(foods);
   }
 }

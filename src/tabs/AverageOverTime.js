@@ -33,12 +33,13 @@ import {
 import { useEffect, useState } from "react";
 export default function AverageOverTime() {
   const [chartData, setChartData] = useState([]);
-  const [timeInterval, setTimeInterval] = useState("7");
+  const [timeInterval, setTimeInterval] = useState("1");
   const [numOfDataPoints, setNumOfDataPoints] = useState(20);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
   const [dayData, setDayData] = useState(null);
   const [actualScale, setActualScale] = useState("no");
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     if (selectedDot?.eventType == "dot" && selectedDot?.date) {
@@ -54,8 +55,9 @@ export default function AverageOverTime() {
   }, [selectedDot]);
 
   const loadChart = () => {
+    console.log("LOADCHART CALLED");
     let promiseArr = [];
-    for (let i = numOfDataPoints * timeInterval; i > 0; i -= timeInterval) {
+    for (let i = numOfDataPoints * timeInterval; i > 0 - 1; i -= timeInterval) {
       promiseArr.push(fetch(`/api/average?offset=${i}`));
     }
     Promise.all(promiseArr).then((resArray) => {
@@ -83,19 +85,28 @@ export default function AverageOverTime() {
             console.log("");
           });
       });
+      setInitialLoad(false);
     });
   };
 
   useEffect(() => {
+    if (initialLoad) {
+      return;
+    }
     if (numOfDataPoints > 2 && numOfDataPoints < 61) {
       setChartData([]);
-      setTimeout(loadChart, 1000);
+      setTimeout(loadChart, 500);
     }
   }, [timeInterval, numOfDataPoints]);
 
   useEffect(() => {
-    console.log(chartData);
-  }, [chartData]);
+    setChartData([]);
+    setTimeout(loadChart, 500);
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(chartData);
+  // }, [chartData]);
 
   const computeMealAvg = (ratingArray) => {
     let sum = 0,
@@ -201,7 +212,7 @@ export default function AverageOverTime() {
                   className="self-start"
                 >
                   <Title>Meals on {dayData.date.replaceAll("-", "/")}</Title>
-                  <Text>{}</Text>
+                  <Text>{ }</Text>
                   <AccordionList className="w-full mt-2">
                     {Object.keys(dayData.meals).map((key) => (
                       <Accordion key={key}>
@@ -214,7 +225,7 @@ export default function AverageOverTime() {
                             className="ml-2"
                             color={
                               computeMealAvg(dayData.meals[key].mealRatings) ==
-                                0 && "red"
+                              0 && "red"
                             }
                           >
                             {computeMealAvg(dayData.meals[key].mealRatings)}

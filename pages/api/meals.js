@@ -1,19 +1,23 @@
 import { MongoClient } from "mongodb";
 import firebaseAdmin from "firebase-admin";
+import { revalidatePath } from "next/cache";
 export default async function handler(req, res) {
   // Retrieving meals by date
   if (req.method == "GET") {
+    console.log(req.query.date);
     const client = new MongoClient(process.env.CAFMONGO);
     const dbName = process.env.CAFMONGO_DB;
     await client.connect();
     const db = client.db(dbName);
     const collection = db.collection("menu");
     const foods = await collection.findOne({
-      date: req.query.date,
+      date: req.query.date
     });
     client.close();
     return res
-      .setHeader("Cache-Control", "max-age=7200, public")
+      .setHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+      .setHeader("Pragma", "no-cache")
+      .setHeader("Expires", "0")
       .status(200)
       .json(foods);
   } else if (req.method == "POST") {
@@ -74,7 +78,12 @@ export default async function handler(req, res) {
       );
       await client.close();
       await firebaseApp.delete();
-      return res.status(200).json(result);
+      revalidatePath(`/api/meals?date=${req.body.date}`);
+      return res
+        .setHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+        .setHeader("Pragma", "no-cache")
+        .setHeader("Expires", "0")
+        .status(200).json(result);
     } else {
       res.status(401).json({
         error: "You are not a Caf App administrator.",

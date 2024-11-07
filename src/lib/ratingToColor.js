@@ -10,8 +10,10 @@ const ratingToColor = (ratingNumber) => {
     return "yellow";
   } else if (ratingNumber > 2) {
     return "orange";
-  } else {
+  } else if (ratingNumber > 0) {
     return "red";
+  } else {
+    return "gray"
   }
 };
 

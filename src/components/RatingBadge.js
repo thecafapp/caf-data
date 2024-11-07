@@ -16,12 +16,12 @@ export default function RatingBadge({
       size={size}
       className={className}
       tooltip={
-        ratingCount != undefined
-          ? `Based on ${ratingCount} rating${rating > 1 ? "s" : ""}`
-          : undefined
+        ratingCount === 0
+          ? "No ratings yet"
+          : (ratingCount != undefined ? `Based on ${ratingCount} rating${rating > 1 ? "s" : ""}` : undefined)
       }
     >
-      {Number(rating).toFixed(decimalPoints)}
+      {rating != undefined ? Number(rating).toFixed(decimalPoints) : "--"}
     </Badge>
   );
 }

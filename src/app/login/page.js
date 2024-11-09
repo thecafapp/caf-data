@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import useFirebaseUser from "../../hooks/useFirebaseUser";
 import { useRouter } from "next/navigation";
 import { Card, Icon, Title, Text, Button } from "@tremor/react";
-import { ArrowUpLeftIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { ArrowUpLeftIcon, Cog6ToothIcon, KeyIcon } from "@heroicons/react/24/outline";
 import "./page.css";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
@@ -113,7 +113,8 @@ function Login() {
         ) : (
           <>
             <Card className="max-w-96 mx-auto text-center pb-5">
-              <Text color="white">Redirecting to admin...</Text>
+              <Icon icon={Cog6ToothIcon} size="lg" className="animate-spin" />
+              <Text>Redirecting to admin...</Text>
             </Card>
           </>
         )}

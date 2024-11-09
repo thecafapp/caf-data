@@ -28,16 +28,12 @@ import {
   ArrowLeftIcon,
   ArrowUpLeftIcon,
   CheckIcon,
-  CubeTransparentIcon,
   PlusIcon,
   TrashIcon,
   UserMinusIcon,
   Cog6ToothIcon,
   MoonIcon,
-  ArrowDownIcon,
-  PencilIcon,
 } from "@heroicons/react/24/outline";
-import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "../../components/TremorDrawer";
 import { Calendar } from "../../components/TremorCalendar";
 import { Tooltip } from "../../components/TremorTooltip";
 import TimeInput from "../../components/TimeInput";
@@ -45,8 +41,7 @@ import { useEffect, useState } from "react";
 import FoodList from "../../components/admin/FoodList";
 import useFirebaseUser from "../../hooks/useFirebaseUser";
 import useHasChanged from "../../hooks/useHasChanged";
-import { Label } from "../../components/TremorLabel";
-import { CardHeader } from "@nextui-org/react";
+import MealException from "../../components/admin/MealException";
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
   authDomain: "login.thecaf.app",
@@ -71,13 +66,6 @@ export default function Admin({ searchParams }) {
   const [mealtime, setMealtime] = useState(0);
   const [updated, setUpdated] = useState(null);
   const [mealFoods, setMealFoods] = useState([]);
-  const [exception, setException] = useState(null);
-  const [exceptionInputs, setExceptionInputs] = useState({
-    name: "",
-    start: "",
-    end: ""
-  })
-  const [exceptionFormOpen, setExceptionFormOpen] = useState(false);
 
   const datahasChanged = useHasChanged(data);
 
@@ -211,6 +199,7 @@ export default function Admin({ searchParams }) {
       <Flex className="mt-6 gap-6 items-stretch">
         <Card className="w-max">
           <Calendar
+            fromDate={new Date()}
             onSelect={(d) => {
               if (d < new Date() - 86400000) {
                 nextRouter.push(
@@ -385,93 +374,8 @@ export default function Admin({ searchParams }) {
             </>
           )}
         </Card>
-        <Card className="w-2/5">
-          <Title>Mealtime Exception</Title>
-          {!exception ? <Flex justifyContent="center" flexDirection="col" className="h-full">
-            <Icon
-              icon={CubeTransparentIcon}
-              size="lg"
-              variant="light"
-              className="mb-1"
-            />
-            <Subtitle color="slate" className="text-sm mb-3">
-              The selected meal has not been customized.
-            </Subtitle>
-            {!!data && <Button className="mb-6" onClick={() => {
-              setExceptionInputs({
-                name: data.meals[mealtime].name,
-                start: new Date(data.meals[mealtime].start).toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit' }),
-                end: new Date(data.meals[mealtime].end).toLocaleTimeString("en-US", { hour: 'numeric', minute: '2-digit' })
-              });
-              setExceptionFormOpen(true)
-            }}>Add an exception</Button>}
-          </Flex> :
-            <>
-              {!!data && <Card className="mt-4 opacity-65">
-                <p className="italic">{data.meals[mealtime].name} from {data.meals[mealtime].times}</p>
-              </Card>}
-              <Icon
-                icon={ArrowDownIcon}
-                size="lg"
-                className="my-4 mx-auto w-full"
-                variant="simple"
-              />
-              <Card color="blue">
-                <p className="font-bold">{exception.name} from {exception.start} - {exception.end}</p>
-              </Card>
-              <Flex className="mt-4 items-center justify-center gap-2" alignItems="center">
-                <Button variant="primary" icon={PencilIcon} onClick={() => setExceptionFormOpen(true)}>Edit</Button>
-                <Button variant="secondary" icon={TrashIcon} onClick={() => setExceptionFormOpen(true)}>Delete</Button>
-              </Flex>
-            </>}
-        </Card>
+        {!!data && <MealException meal={data.meals[mealtime]} date={data.date} />}
       </Flex>
-      <Drawer
-        open={exceptionFormOpen}
-        onOpenChange={(modalOpened) => {
-          if (!modalOpened) {
-            setExceptionFormOpen(false);
-          }
-        }}
-      >
-        <DrawerContent className="sm:max-w-lg">
-          <DrawerHeader>
-            <DrawerTitle>Exception editor</DrawerTitle>
-            {!!data && <DrawerDescription className="mt-1 text-sm">
-              {data.meals[mealtime].name} on {data.date}
-            </DrawerDescription>}
-          </DrawerHeader>
-          <DrawerBody>
-            <Label htmlFor="exceptionMealName">Meal name</Label>
-            <TextInput name="exceptionMealName" placeholder="Meal name" value={exceptionInputs.name} onValueChange={(v) => setExceptionInputs({ ...exceptionInputs, name: v })} />
-            <div className="grid grid-cols-2 mt-4 mb-4 gap-x-4">
-              <Label htmlFor="exceptionStart" className="mb-1">Start Time</Label>
-              <Label htmlFor="exceptionEnd" className="mb-1">End Time</Label>
-              <TimeInput name="exceptionStart" value={exceptionInputs.start} onChange={(e) => setExceptionInputs({ ...exceptionInputs, start: e.target.value })} />
-              <TimeInput name="exceptionEnd" value={exceptionInputs.end} onChange={(e) => setExceptionInputs({ ...exceptionInputs, end: e.target.value })} />
-            </div>
-            <Callout title="About exceptions" color="yellow">
-              Exceptions allow changing meal times and names on specific dates.  These are designed to override regular meals, and if there is to be a permanent change in schedule or naming you should use the Recurring Mealtimes panel.
-            </Callout>
-          </DrawerBody>
-          <DrawerFooter className="mt-6">
-            <DrawerClose asChild>
-              <Button
-                className="mt-2 w-full sm:mt-0 sm:w-fit"
-                variant="secondary"
-              >
-                Cancel
-              </Button>
-            </DrawerClose>
-            <Button className="w-full sm:w-fit" onClick={() => {
-              setException(exceptionInputs);
-              setExceptionFormOpen(false);
-            }}>
-              Save exception
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
     </main>
   );
 }

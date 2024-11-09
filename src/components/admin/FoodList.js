@@ -81,7 +81,7 @@ export default function FoodList({
             onValueChange={(v) => setMeal(v)}
           >
             {meals.map((m) => (
-              <SelectItem value={m.name} key={m.name}>
+              <SelectItem value={m.name} key={m.name} className="cursor-pointer">
                 {m.name}
               </SelectItem>
             ))}
@@ -123,8 +123,9 @@ export default function FoodList({
           {foodQuery.length > 2 && <SearchSelectItem value="create" className="cursor-pointer" icon={() => (
             <Badge
               size="xs"
-              className="ml-2 order-last"
+              className="ml-2 order-last cursor-pointer"
               color="blue"
+              tooltip="Create a new food item"
             >Create new</Badge>
           )}>{foodQuery}</SearchSelectItem>}
         </SearchSelect>

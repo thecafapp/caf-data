@@ -35,17 +35,17 @@ export default function FoodTable({
         <TableBody>
           {foods.map((item) => (
             <TableRow key={item._id + Math.random()}>
-              <TableCell className="capitalize">{item.name}</TableCell>
-              <TableCell>
+              <TableCell className="capitalize py-2 dark:text-slate-400">{item.name}</TableCell>
+              <TableCell className="py-2">
                 <RatingBadge rating={item.rating} ratingCount={item.ratings} />
               </TableCell>
               {showId && (
-                <TableCell>
+                <TableCell className="py-2">
                   <Text>{item._id}</Text>
                 </TableCell>
               )}
               {!!customLastColumn && (
-                <TableCell>{customLastColumn(item)}</TableCell>
+                <TableCell className="py-2">{customLastColumn(item)}</TableCell>
               )}
             </TableRow>
           ))}

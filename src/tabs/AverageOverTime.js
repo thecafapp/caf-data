@@ -30,11 +30,13 @@ import {
   AccordionList,
   Icon,
 } from "@tremor/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 export default function AverageOverTime() {
+  const loading = useRef(false);
+  const [unsortedData, setUnsortedData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [timeInterval, setTimeInterval] = useState("1");
-  const [numOfDataPoints, setNumOfDataPoints] = useState(20);
+  const [numOfDataPoints, setNumOfDataPoints] = useState(7);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
   const [dayData, setDayData] = useState(null);
@@ -55,6 +57,10 @@ export default function AverageOverTime() {
   }, [selectedDot]);
 
   const loadChart = () => {
+    if (loading.current) {
+      return false;
+    }
+    loading.current = true;
     console.log("LOADCHART CALLED");
     let promiseArr = [];
     for (let i = numOfDataPoints * timeInterval; i > 0 - 1; i -= timeInterval) {
@@ -75,16 +81,13 @@ export default function AverageOverTime() {
                     ? Number(data.mealAverage).toFixed(4)
                     : null,
               });
-              entries.sort((a, b) => {
-                return new Date(a.date) - new Date(b.date);
-              });
-              setChartData(entries);
             }
           })
           .catch(() => {
             console.log("");
           });
       });
+      setUnsortedData(entries);
       setInitialLoad(false);
     });
   };
@@ -94,19 +97,23 @@ export default function AverageOverTime() {
       return;
     }
     if (numOfDataPoints > 2 && numOfDataPoints < 61) {
-      setChartData([]);
+      setUnsortedData([]);
       setTimeout(loadChart, 500);
     }
   }, [timeInterval, numOfDataPoints]);
 
   useEffect(() => {
-    setChartData([]);
+    setUnsortedData([]);
     setTimeout(loadChart, 500);
   }, []);
 
-  // useEffect(() => {
-  //   console.log(chartData);
-  // }, [chartData]);
+  useEffect(() => {
+    console.log("UNSORTED TO SORTED!!!")
+    unsortedData.sort((a, b) => {
+      return b.offset - a.offset;
+    });
+    setChartData(unsortedData);
+  }, [unsortedData]);
 
   const computeMealAvg = (ratingArray) => {
     let sum = 0,
@@ -190,6 +197,7 @@ export default function AverageOverTime() {
               maxValue={5}
               yAxisLabel="Stars"
               xAxisLabel="Date"
+              curveType="monotone"
             />
           ) : (
             <Flex

@@ -82,5 +82,6 @@ export default async function handler(req, res) {
       foodAverage: avgFood,
       mealAverage: avgMeal > 0 ? avgMeal : null,
       date: documentName.split("cafdata-")[1].split(".json")[0],
+      offset: req.query.offset
     });
 }

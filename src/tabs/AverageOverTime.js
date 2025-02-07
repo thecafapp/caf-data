@@ -5,6 +5,8 @@ import {
   Cog6ToothIcon,
   ExclamationCircleIcon,
   StarIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import {
   TabPanel,
@@ -29,13 +31,14 @@ import {
   AccordionHeader,
   AccordionList,
   Icon,
+  Button,
 } from "@tremor/react";
 import { useEffect, useRef, useState } from "react";
 export default function AverageOverTime() {
   const loading = useRef(false);
-  const [unsortedData, setUnsortedData] = useState([]);
+  const [timeOffset, setTimeOffset] = useState(0);
   const [chartData, setChartData] = useState([]);
-  const [timeInterval, setTimeInterval] = useState("1");
+  const [timeInterval, setTimeInterval] = useState(1);
   const [numOfDataPoints, setNumOfDataPoints] = useState(7);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
@@ -61,59 +64,46 @@ export default function AverageOverTime() {
       return false;
     }
     loading.current = true;
-    console.log("LOADCHART CALLED");
-    let promiseArr = [];
-    for (let i = numOfDataPoints * timeInterval; i > 0 - 1; i -= timeInterval) {
-      promiseArr.push(fetch(`/api/average?offset=${i}`));
+    let indexArr = [];
+    console.log((numOfDataPoints * timeInterval) + timeOffset);
+    for (let i = (numOfDataPoints * timeInterval) + timeOffset; i > 0 + timeOffset; i -= timeInterval) {
+      indexArr.push(i);
     }
-    Promise.all(promiseArr).then((resArray) => {
+    console.log(indexArr);
+    Promise.all(indexArr.map((i) => fetch(`/api/average?offset=${i}`))).then(async (resArray) => {
       let entries = [];
-      resArray.forEach((res) => {
-        res
-          .json()
-          .then((data) => {
-            if (res.ok) {
-              entries.push({
-                date: data.date,
-                "Cumulative Food Rating": Number(data.foodAverage).toFixed(4),
-                "Meal Rating":
-                  data.mealAverage != null
-                    ? Number(data.mealAverage).toFixed(4)
-                    : null,
-              });
-            }
-          })
-          .catch(() => {
-            console.log("");
+      for (let res of resArray) {
+        if (res.ok) {
+          const data = await res.json();
+          entries.push({
+            date: data.date,
+            "Cumulative Food Rating": Number(data.foodAverage).toFixed(4),
+            "Meal Rating":
+              data.mealAverage != null
+                ? Number(data.mealAverage).toFixed(4)
+                : null,
           });
-      });
-      setUnsortedData(entries);
+        }
+      }
+      entries.sort((a, b) => {
+        return b.offset - a.offset;
+      })
+      setChartData(entries);
       setInitialLoad(false);
+      loading.current = false;
     });
   };
 
   useEffect(() => {
     if (initialLoad) {
+      setTimeout(loadChart, 100);
       return;
     }
     if (numOfDataPoints > 2 && numOfDataPoints < 61) {
-      setUnsortedData([]);
+      setChartData([]);
       setTimeout(loadChart, 500);
     }
-  }, [timeInterval, numOfDataPoints]);
-
-  useEffect(() => {
-    setUnsortedData([]);
-    setTimeout(loadChart, 500);
-  }, []);
-
-  useEffect(() => {
-    console.log("UNSORTED TO SORTED!!!")
-    unsortedData.sort((a, b) => {
-      return b.offset - a.offset;
-    });
-    setChartData(unsortedData);
-  }, [unsortedData]);
+  }, [timeInterval, numOfDataPoints, timeOffset]);
 
   const computeMealAvg = (ratingArray) => {
     let sum = 0,
@@ -168,9 +158,9 @@ export default function AverageOverTime() {
                 enableClear={false}
                 onChange={setTimeInterval}
               >
-                <SelectItem value="1">By day</SelectItem>
-                <SelectItem value="7">By week</SelectItem>
-                <SelectItem value="30">By month</SelectItem>
+                <SelectItem value={1}>By day</SelectItem>
+                {/* <SelectItem value="7">By week</SelectItem>
+                <SelectItem value="30">By month</SelectItem> */}
               </Select>
               <MultiSelect value={categories} onValueChange={setCategories}>
                 <MultiSelectItem value="Cumulative Food Rating">
@@ -197,7 +187,7 @@ export default function AverageOverTime() {
               maxValue={5}
               yAxisLabel="Stars"
               xAxisLabel="Date"
-              curveType="monotone"
+              curveType="linear"
             />
           ) : (
             <Flex
@@ -209,6 +199,16 @@ export default function AverageOverTime() {
               <Subtitle>Loading data...</Subtitle>
             </Flex>
           )}
+          <Flex justifyContent="between" className="mt-3">
+            <Button icon={ArrowLeftIcon} variant="secondary" color="slate" onClick={() => setTimeOffset(timeOffset + numOfDataPoints)}>Previous Time Period</Button>
+            <Button icon={ArrowRightIcon} iconPosition="right" variant="secondary" color="slate" onClick={() => {
+              if (timeOffset - numOfDataPoints > 0) {
+                setTimeOffset(timeOffset - numOfDataPoints)
+              } else {
+                setTimeOffset(0);
+              }
+            }}>Next Time Period</Button>
+          </Flex>
         </Card>
         <Grid numItemsMd={2} className="mt-6 gap-6">
           <Card>

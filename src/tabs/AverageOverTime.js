@@ -12,7 +12,6 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
-import { CardHeader } from "@nextui-org/react";
 import {
   TabPanel,
   Card,

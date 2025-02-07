@@ -7,7 +7,12 @@ import {
   StarIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  ArrowDownRightIcon,
+  ArrowUpRightIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/outline";
+import { CardHeader } from "@nextui-org/react";
 import {
   TabPanel,
   Card,
@@ -39,15 +44,67 @@ export default function AverageOverTime() {
   const [timeOffset, setTimeOffset] = useState(0);
   const [chartData, setChartData] = useState([]);
   const [timeInterval, setTimeInterval] = useState(1);
-  const [numOfDataPoints, setNumOfDataPoints] = useState(7);
+  const [numOfDataPoints, setNumOfDataPoints] = useState(30);
   const [selectedDot, setSelectedDot] = useState(null);
   const [categories, setCategories] = useState(["Meal Rating"]);
+  const [periodData, setPeriodData] = useState(null);
   const [dayData, setDayData] = useState(null);
   const [actualScale, setActualScale] = useState("no");
   const [initialLoad, setInitialLoad] = useState(true);
+  const [mealComparison, setMealComparison] = useState();
+  const [periodComparison, setPeriodComparison] = useState();
 
   useEffect(() => {
     if (selectedDot?.eventType == "dot" && selectedDot?.date) {
+      const dataIndex = chartData.findIndex((obj) => obj.date == selectedDot.date);
+      if (dataIndex > 0) {
+        const percentDifference = (Number(chartData[dataIndex]["Meal Rating"]) / Number(chartData[dataIndex - 1]["Meal Rating"])) * 100;
+        if (percentDifference < 100) {
+          setMealComparison({
+            text: "worse than previous day",
+            color: "red",
+            icon: ArrowDownRightIcon,
+            amount: (100 - percentDifference).toFixed(0)
+          });
+        } else if (percentDifference > 100) {
+          setMealComparison({
+            text: "better than previous day",
+            color: "green",
+            icon: ArrowUpRightIcon,
+            amount: (percentDifference - 100).toFixed(0)
+          });
+        } else {
+          setMealComparison({
+            text: "same as previous day",
+            color: "yellow",
+            icon: ArrowRightIcon,
+            amount: "0"
+          });
+        }
+      }
+      const percentDifference = (Number(chartData[dataIndex]["Meal Rating"]) / periodData.average) * 100;
+      if (percentDifference < 100) {
+        setPeriodComparison({
+          text: "worse than average in this period",
+          color: "red",
+          icon: ArrowDownIcon,
+          amount: (100 - percentDifference).toFixed(0)
+        });
+      } else if (percentDifference > 100) {
+        setPeriodComparison({
+          text: "better than average in this period",
+          color: "green",
+          icon: ArrowUpIcon,
+          amount: (percentDifference - 100).toFixed(0)
+        });
+      } else {
+        setPeriodComparison({
+          text: "average in this period",
+          color: "yellow",
+          icon: ArrowRightIcon,
+          amount: "0"
+        });
+      }
       fetch(`/api/raw?file=cafdata-${selectedDot.date}.json`)
         .then((res) => res.json())
         .then((json) => {
@@ -56,6 +113,8 @@ export default function AverageOverTime() {
     } else {
       setSelectedDot(null);
       setDayData(null);
+      setMealComparison(null);
+      setPeriodComparison(null);
     }
   }, [selectedDot]);
 
@@ -65,13 +124,12 @@ export default function AverageOverTime() {
     }
     loading.current = true;
     let indexArr = [];
-    console.log((numOfDataPoints * timeInterval) + timeOffset);
-    for (let i = (numOfDataPoints * timeInterval) + timeOffset; i > 0 + timeOffset; i -= timeInterval) {
+    for (let i = (numOfDataPoints * timeInterval) + timeOffset; i > -1 + timeOffset; i -= timeInterval) {
       indexArr.push(i);
     }
-    console.log(indexArr);
     Promise.all(indexArr.map((i) => fetch(`/api/average?offset=${i}`))).then(async (resArray) => {
       let entries = [];
+      let compositeMealRating = 0;
       for (let res of resArray) {
         if (res.ok) {
           const data = await res.json();
@@ -83,6 +141,8 @@ export default function AverageOverTime() {
                 ? Number(data.mealAverage).toFixed(4)
                 : null,
           });
+          compositeMealRating += Number(data.mealAverage);
+          setPeriodData({ average: compositeMealRating / entries.length });
         }
       }
       entries.sort((a, b) => {
@@ -96,10 +156,16 @@ export default function AverageOverTime() {
 
   useEffect(() => {
     if (initialLoad) {
+      setPeriodData(null);
+      setPeriodComparison(null);
+      setMealComparison(null);
       setTimeout(loadChart, 100);
       return;
     }
     if (numOfDataPoints > 2 && numOfDataPoints < 61) {
+      setPeriodData(null);
+      setPeriodComparison(null);
+      setMealComparison(null);
       setChartData([]);
       setTimeout(loadChart, 500);
     }
@@ -200,14 +266,14 @@ export default function AverageOverTime() {
             </Flex>
           )}
           <Flex justifyContent="between" className="mt-3">
-            <Button icon={ArrowLeftIcon} variant="secondary" color="slate" onClick={() => setTimeOffset(timeOffset + numOfDataPoints)}>Previous Time Period</Button>
+            <Button icon={ArrowLeftIcon} variant="secondary" color="slate" onClick={() => setTimeOffset(timeOffset + numOfDataPoints)}>Previous {numOfDataPoints} Days</Button>
             <Button icon={ArrowRightIcon} iconPosition="right" variant="secondary" color="slate" onClick={() => {
               if (timeOffset - numOfDataPoints > 0) {
                 setTimeOffset(timeOffset - numOfDataPoints)
               } else {
                 setTimeOffset(0);
               }
-            }}>Next Time Period</Button>
+            }}>Next {numOfDataPoints} Days</Button>
           </Flex>
         </Card>
         <Grid numItemsMd={2} className="mt-6 gap-6">
@@ -291,16 +357,27 @@ export default function AverageOverTime() {
             </Flex>
           </Card>
           <Card className="h-max">
-            <Callout
-              title="Data disclaimer"
-              icon={ExclamationCircleIcon}
-              color="yellow"
-            >
-              This chart only has access to data since August 17, 2023. It must
-              also be noted that more foods are added to the database all the
-              time, meaning that increased average rating does not necessarily
-              correlating to individual foods getting better in quality.
-            </Callout>
+            {periodComparison ? <>
+              <Title className="mb-2">Insights</Title>
+              <Flex justifyContent="start" className="mb-2">
+                <Badge color={periodComparison.color} icon={periodComparison.icon} title="Test">{periodComparison.amount}%</Badge>
+                <Subtitle className="ml-2" color="slate">{periodComparison.text}</Subtitle>
+              </Flex>
+              <Flex justifyContent="start">
+                <Badge color={mealComparison.color} icon={mealComparison.icon} title="Test">{mealComparison.amount}%</Badge>
+                <Subtitle className="ml-2" color="slate">{mealComparison.text}</Subtitle>
+              </Flex>
+            </>
+              : <Callout
+                title="Data disclaimer"
+                icon={ExclamationCircleIcon}
+                color="yellow"
+              >
+                This chart only has access to data since August 17, 2023. It must
+                also be noted that more foods are added to the database all the
+                time, meaning that increased average rating does not necessarily
+                correlating to individual foods getting better in quality.
+              </Callout>}
           </Card>
         </Grid>
       </div>

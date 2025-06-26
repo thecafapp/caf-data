@@ -23,13 +23,13 @@ export default function Dashboard() {
     amount: "0.0000",
   });
   useEffect(() => {
-    fetch(`https://thecaf.app/api/foods?method=highest`)
+    fetch(`https://mc.thecaf.app/api/foods?method=highest`)
       .then((res) => res.json())
       .then((json) => {
         setMostPopularItem(json.topFoods[0]);
         setPopularFoods(json.topFoods);
       });
-    fetch(`https://thecaf.app/api/foods?method=lowest`)
+    fetch(`https://mc.thecaf.app/api/foods?method=lowest`)
       .then((res) => res.json())
       .then((json) => {
         setWorstItem(json.worstFoods[0]);

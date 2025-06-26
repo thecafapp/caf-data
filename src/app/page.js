@@ -88,7 +88,7 @@ export default function Home() {
     <main className="p-8 max-w-screen-xl m-auto">
       <Flex justifyContent="start">
         <Image
-          src="https://thecaf.app/caf.svg"
+          src="https://mc.thecaf.app/caf.svg"
           width={50}
           height={50}
           alt="The Caf App logo"
@@ -108,7 +108,7 @@ export default function Home() {
           <Text>
             A dashboard for historical rating data from{" "}
             <a
-              href="https://thecaf.app"
+              href="https://mc.thecaf.app"
               target="_blank"
               className="text-blue-500"
             >

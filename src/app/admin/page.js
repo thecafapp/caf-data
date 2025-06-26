@@ -151,7 +151,7 @@ export default function Admin({ searchParams }) {
     <main className="p-8 max-w-screen-xl m-auto">
       <Flex justifyContent="start">
         <Image
-          src="https://thecaf.app/caf.svg"
+          src="https://mc.thecaf.app/caf.svg"
           width={50}
           height={50}
           alt="The Caf App logo"

@@ -43,7 +43,7 @@ function Login() {
     } else if (user) {
       (async () => {
         const token = await user.getIdToken();
-        fetch("https://thecaf.app/api/account", {
+        fetch("https://mc.thecaf.app/api/account", {
           method: "POST",
           headers: { "x-firebase-token": token },
         })
